@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leson 2</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    // Vue.createApp({
+    //     data() {
+    //         return {
+    //             content: 'hello world'
+    //         }
+    //     },
+    //     methods: {
+    //         handleBtnClick() {
+    //             this.content = this.content.split("").reverse().join("")
+    //         }
+    //     },
+    //     // v-on 绑定事件
+    //     template: `
+    //     <div>{{content}}
+    //         <button v-on:click="handleBtnClick">反转</button>
+    //     </div>
+    //     `
+    // }).mount('#root')
+    Vue.createApp({
+        data() {
+            return {
+                inputValue: "",
+                deleteIndex: -1,
+                list: []
+            }
+        },
+        methods: {
+            handleAddItem() {
+                if (!this.inputValue) return
+                this.list.push(this.inputValue)
+                this.inputValue = ""
+            },
+            handleDeleteItem() {
+                if (this.deleteIndex < 0) return
+                this.list.splice(this.deleteIndex, 1)
+            },
+            handleClear() {
+                this.list = []
+            }
+        },
+        // v-on 绑定事件
+        template: `
+        <div>
+            <input v-model="inputValue"/>
+            <button v-on:click="handleAddItem">增加</button>
+            <ul>
+                <li v-for="(item,index) of list">{{index+1}}: {{item}} <button v-on:click="handleDeleteItem">删除</button> </li>
+                
+            </ul>
+            <button v-on:click="handleClear">清空</button>
+        </div>
+        
+        `
+    }).mount('#root')
+</script>
+
+</html>

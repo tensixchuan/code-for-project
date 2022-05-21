@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 7</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                htmlMssage: "<strong>hello</strong>",
+                message: 'hello',
+                disable: true,
+                show: true
+            }
+        },
+        // v-html 通过html方式展示变量 <div v-html="htmlMssage"></div>
+        // v-bind 绑定值 <div v-bind:title="message">hello world</div>
+        //               <input v-bind:disabled = "disable"/>
+        // v - once 只使用一次变量，后续数据发生变化也不会重新渲染 <div v-once>{{message}}</div>
+        // v-if 是否展示 <div v-if="show">{{message}}</div>
+        template: `<div v-if="show">{{message}}</div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

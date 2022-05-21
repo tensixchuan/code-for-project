@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson5</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // mvvm设计模式，m -> model 数据, v-> view 视图, vm -> viewModel 视图数据连接层
+    const app = Vue.createApp({
+        data() { // 数据
+            return {
+                message: "hello"
+            }
+        },
+        // 生命周期函数：在某一时刻立即执行的函数
+        // 在实例生成前自动执行的函数
+        beforeCreate() {
+            console.log("beforCreate")
+        },
+        // 实例生成后自动执行的函数
+        created() {
+            console.log("created")
+        },
+        // 在组件内容被渲染到页面前自动执行的函数
+        beforeMount() {
+            console.log("beforMount")
+            console.log(document.getElementById("root").innerHTML)
+        },
+        // 在组件内容被渲染到页面之后自动执行的函数
+        mounted() {
+            console.log("mounted")
+            console.log(document.getElementById("root").innerHTML)
+        },
+        // 数据变化时立即自动执行
+        beforeUpdate() {
+            console.log("beforeUpdate")
+            console.log(document.getElementById("root").innerHTML)
+        },
+        // 数据变化，页面重新渲染后立即执行
+        updated() {
+            console.log("updated")
+            console.log(document.getElementById("root").innerHTML)
+        },
+        // vue 应用失效时，自动执行的函数
+        beforeUnmount() {
+
+        },
+        // vue 应用失效，且dom完全销毁之后自动执行的函数
+        unmounted() {
+            console.log(document.getElementById("root").innerHTML, 'unmounted')
+        },
+        template: "<div>{{message}}</div>" //视图
+    })
+
+    //vm就是vue应用的根组件，viewModel
+    const vm = app.mount("#root")
+</script>
+
+</html>
