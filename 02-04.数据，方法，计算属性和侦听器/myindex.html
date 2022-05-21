@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 7</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                message: 'hello',
+                count: 1,
+                price: 5
+            }
+        },
+        // data & methods & computed & watcher
+        // computed 和 methods 都能实现的功能，建议使用 computed, 因为有缓存
+        // computed 和 watch 都能实现的功能，建议使用 computed, 因为更简洁
+        watch: {
+            // price发生变化时会执行
+            price(curent, prev) {
+                console.log("price changed from", prev, "to", curent)
+            }
+        },
+        computed: {
+            // 当计算属性依赖的内容发生变化时，才会重新计算
+            total() {
+                return this.count * this.price
+            }
+        },
+        methods: {
+            handleClick() {
+                console.log(data.message)
+            },
+            // 只要页面重新渲染，就会重新计算
+            getTotal() {
+                return this.count * this.price
+            }
+        },
+        template: `
+        <div @click="handleClick">{{total}}</div>
+        `
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

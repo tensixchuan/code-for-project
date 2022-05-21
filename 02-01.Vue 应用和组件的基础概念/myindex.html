@@ -31,7 +31,7 @@
         },
         // 在组件内容被渲染到页面前自动执行的函数
         beforeMount() {
-            console.log("beforMount")
+            console.log("beforMount", this.message)
             console.log(document.getElementById("root").innerHTML)
         },
         // 在组件内容被渲染到页面之后自动执行的函数

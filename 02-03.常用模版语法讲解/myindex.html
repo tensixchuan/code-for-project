@@ -19,15 +19,34 @@
                 htmlMssage: "<strong>hello</strong>",
                 message: 'hello',
                 disable: true,
-                show: true
+                show: true,
+                name: 'title',
+                event: 'click'
+            }
+        },
+        methods: {
+            handleClick() {
+                alert(this.message)
+            },
+            handlePreventDefault(e) {
+                e.preventDefault()
             }
         },
         // v-html 通过html方式展示变量 <div v-html="htmlMssage"></div>
         // v-bind 绑定值 <div v-bind:title="message">hello world</div>
         //               <input v-bind:disabled = "disable"/>
+        //        简写： <input :disabled = "disable"/>
         // v - once 只使用一次变量，后续数据发生变化也不会重新渲染 <div v-once>{{message}}</div>
         // v-if 是否展示 <div v-if="show">{{message}}</div>
-        template: `<div v-if="show">{{message}}</div>`
+        // v-on 绑定事件 <div v-on:click="handleClick">{{message}}</div> 事件写在methods中
+        //        简写： <div @click="handleClick">{{message}}</div> 事件写在methods中
+        // []动态属性，属性值由data中的属性值决定 <div @[event]="handleClick" :[name]="message">{{message}}</div> v-on v-bind都可以使用动态属性
+        // .prevent 修饰符，阻止默认行为
+        template: `
+        <form action="https://www.baidu.com" @click="handlePreventDefault">
+            <button>提交</button>
+        <form/>
+        `
     })
     const vm = app.mount("#root")
 </script>
