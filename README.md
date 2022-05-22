@@ -457,7 +457,302 @@ const app = Vue.createApp({
   <div v-else='conditionTwo'>else</div>
   ```
 
-  
+### 2-6 列表循环渲染
+
+- **循环数组：**v-for="(item, index) in listArray"，第一个参数是元素值，第二个参数是对应索引
+
+​	 `<div v-for="(item, index) in listArray" :key="item">{{item}} --- {{index}}</div>`
+
+- **循环对象：**v-for="(value, key, index) in listObject"，第一个参数是元素值，第二个参数键名，第三个参数是对应索引
+
+​	 `<div v-for="(value, key, index) in listObject" :key="value">{{value}} --- {{key}} --- {{index}}</div>`
+
+- **循环数字：** `v-for="item in 10" ` item值为1-10
+
+使用v-for时最好**指定key**，作为数据项的唯一索引，可以就地复用，有利于提高渲染效率。
+
+注：变更数据的方法：
+
+1. 使用数组的变更函数 push pop shift unshift splice sort reverse
+2. 直接替换数组 this.listArray = ["hey"]   this.listArray = ["hey"] .filter(item => item==="hey")
+3. 直接更新数组内容 this.listArray[0] = "hello"
+4. 直接添加对象的内容，也可以自动展示
+
+
+
+v-if 和 v-for 同时出现（在同 一个标签）时, v-if会失效，因为v-for优先级更高，例如：
+
+```
+<div v-for="(value, index) in listArray" :key="value"  v-if="value !== 'lee'">
+	{{value}} --- {{index}}
+</div>
+```
+
+v-if会失效,lee还是会显示出来
+
+解决 v-if失效方法：
+
+1. 增加一个新标签，使v-if和v-for不在同一标签内，但是会多一层嵌套
+
+```
+<div>
+	<div v-for="(value, index) in listArray" :key="value">
+		<div v-if="value !== 'lee'">
+			{{value}} --- {{index}}
+		</div>
+	</div>
+	<div v-for="item in 10">
+		{{item}}
+	</div>
+</div>
+```
+
+![image-20220522160642074](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220522160642074.png)
+
+2. 使用template标签，这样在Dom中能减少嵌套。template标签只是一个占位符。
+
+   ```
+    <div>
+   	<template v-for="(value, index) in listArray" :key="value">
+   		<div v-if="value !== 'lee'">
+   			{{value}} --- {{index}}
+   		</div>
+   	</template>
+   	<div v-for="item in 10">
+   		{{item}}
+   	</div>
+   </div>
+   ```
+
+   ![image-20220522160807385](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220522160807385.png)
+
+
+
+### 2-7 事件绑定
+
+```js
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        methods: {
+            handleBtnClick(event) { //统计点击次数
+                console.log(event)
+                this.counter++
+            }
+        },
+        template: `
+        <div>
+            {{counter}}
+            <button @click="handleBtnClick">button</button>
+        </div>
+        
+        `
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+1. 如果要传递参数，同时获取原生事件，可以@click="handleBtnClick(num, $event)"
+
+2. 如果要执行多个事件，可以@click="handleBtnClick1(), handleBtnClick2()"，逗号分隔，函数加括号
+
+#### 事件修饰符：stop self prevent capture once passive
+
+- **.stop** 阻止冒泡
+- **.self** 只执行自身触发的事件
+- **.prevent** 阻止默认事件
+- **.capture** 事件运行模式变为捕获
+- **.once** 事件绑定只执行一次
+- **.passive** 和scroll组合，提升滚动性能 @scroll.passive
+
+#### 按键修饰符
+
+按键事件为keydown，常规写按键事件的话需要获取event，然后通过event.keyCode判断按的哪个按键（eg: 函数handleKeyDown1），而采用按键修饰符可以按下指定键才执行函数（eg: 修饰符.enter，函数handleKeyDown1）。
+
+```
+const app = Vue.createApp({
+        methods: {
+            handleKeyDown1(event) { // 按enter键执行函数
+                console.log(event)
+                if (event.keyCode === 13) console.log("enter")
+            },
+            handleKeyDown2(event) {
+                console.log("enter2")
+            }
+        },
+        template: `
+        <div>
+            <input @keydown="handleKeyDown1"></input>
+            <input @keydown.enter="handleKeyDown2"></input>
+        </div>
+        
+        `
+    })
+    const vm = app.mount("#root")
+```
+
+**常见按键修饰符有：enter tab delete esc up down left right 等**
+
+#### 鼠标修饰符
+
+ **常见鼠标修饰符有：left right middle**
+
+eg： `<div @click.right="handleDivClick">1234</div>`
+
+#### 精确修饰符 exact
+
+```
+ <div @click.ctrl="handleDivClick">1234</div>
+```
+
+这里按下ctrl键再按其他的键，再点击就会执行方法。若要求只有按下ctrl键再点击才执行，可以使用精确修饰符
+
+```
+ <div @click.ctrl.exact="handleDivClick">1234</div>
+```
+
+### 2-8 表单中的双向绑定指令
+
+#### input
+
+```
+<input v-model="message" />
+```
+
+
+
+#### textarea
+
+一般是这么写：
+
+```
+<textarea>ABC</textarea>
+```
+
+但是用vue可以写成闭合标签：
+
+```
+<textarea v-model="message"/>
+```
+
+
+
+#### checkbox 
+
+- 单个checkbox ：
+
+```
+<input type="checkbox" v-model="isChecked"/>
+```
+
+isChecked为true或false
+
+- 多个checkbox ：
+
+```
+<div>
+	{{messages}}
+	A<input type="checkbox" v-model="messages" value="A"/>
+	B<input type="checkbox" v-model="messages" value="B"/>
+	C<input type="checkbox" v-model="messages" value="C"/>
+</div>
+```
+
+可以绑定到一个数组中，选中时value值加入数组，未选中时不在数组。
+
+可以通过 **true-value、false-value** 设置选中/未选中时的值。
+
+#### radio
+
+radio只能单选，所以不需要用数组存，用字符串存就可以
+
+```
+<div>
+	{{messages}}
+	A<input type="radio" v-model="message" value="A"/>
+	B<input type="radio" v-model="message" value="B"/>
+	C<input type="radio" v-model="message" value="C"/>
+</div>
+```
+
+
+
+#### select
+
+单选：
+
+message初始值为”“:  message=""
+
+```
+{{message}}
+<select v-model="message">
+	<option disabled value="">请选择内容</option>
+	<option>A</option>
+	<option>B</option>
+	<option>C</option>
+</select>
+```
+
+多选：
+
+```
+{{messages}}
+<select v-model="messages" multiple>
+	<option disabled value="">请选择内容</option>
+	<option>A</option>
+	<option>B</option>
+	<option>C</option>
+</select>
+```
+
+v-for：
+
+```
+const app = Vue.createApp({
+        // input textarea checkbox 
+	data() {
+		return {
+                messages: [],
+                options: [{
+                    text: 'A',
+                    value: 'A'
+                }, {
+                    text: 'B',
+                    value: 'B'
+                }, {
+                    text: 'C',
+                    value: 'C'
+                }, {
+                    text: 'D',
+                    value: {
+                        value: 'D'
+                    }
+                }]
+            }
+        },
+	template: `
+        {{messages}}
+        <select v-model="messages" multiple>
+            <option v-for="item in options" :value="item.value">{{item.text}}</option>
+        </select>
+        `
+})
+const vm = app.mount("#root")
+```
+
+#### 修饰符：lazy number trim
+
+- **lazy** 延后反应，节约事件触发成本
+
+- **number** 转化value的类型为number
+
+- **trim** 去除输入前后的空格
+
+
 
 ## 第3章 探索组件的理念
 

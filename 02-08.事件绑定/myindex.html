@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 11</title>
+    <script src="https://unpkg.com/vue@next"></script>
+
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        methods: {
+            handleDivClick() {
+                console.log("handleDivClick")
+                alert(this.counter)
+            },
+            handleBtnClick(event) {
+                console.log("handleBtnClick")
+                this.counter++
+            },
+            handleKeyDown1(event) { // 按enter键执行函数
+                console.log(event)
+                if (event.keyCode === 13) console.log("enter")
+            },
+            handleKeyDown2(event) {
+                console.log("enter2")
+            }
+        },
+        template: `
+        <div @click.self.right="handleDivClick">
+            {{counter}}
+            <button @click.stop="handleBtnClick">button</button>
+            <input @keydown="handleKeyDown1"></input>
+            <input @keydown.enter="handleKeyDown2"></input>
+            <div @click="handleDivClick">{{counter}}</div>
+        </div>
+        
+        `
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 13</title>
+    <script src="https://unpkg.com/vue@next"></script>
+
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        // input textarea checkbox radio select
+        // 修饰符 lazy number trim
+        data() {
+            return {
+                message: "",
+                isChecked: true,
+                messages: [],
+                options: [{
+                    text: 'A',
+                    value: 'A'
+                }, {
+                    text: 'B',
+                    value: 'B'
+                }, {
+                    text: 'C',
+                    value: 'C'
+                }, {
+                    text: 'D',
+                    value: {
+                        value: 'D'
+                    }
+                }]
+            }
+        },
+        template: `
+        {{message}}
+        <input v-model="message" />
+        <textarea v-model="message"/>
+        <input type="checkbox" v-model="isChecked"/>
+        <input type="checkbox" v-model="message"/>
+        <div>
+            {{messages}}
+            A<input type="checkbox" v-model="messages" true-value="A" false-value="a/>
+            B<input type="checkbox" v-model="messages" value="B"/>
+            C<input type="checkbox" v-model="messages" value="C"/>
+        </div>
+        <div>
+            {{messages}}
+            A<input type="radio" v-model="messages" value="A"/>
+            B<input type="radio" v-model="messages" value="B"/>
+            C<input type="radio" v-model="messages" value="C"/>
+        </div>
+        <select v-model="messages" multiple>
+            <option>A</option>
+            <option>B</option>
+            <option>C</option>
+        </select>
+        <select v-model="messages" multiple>
+            <option v-for="item in options" :value="item.value">{{item.text}}</option>
+        </select>
+        `
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>
