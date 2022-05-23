@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 18</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                str: 'ab'
+            }
+        },
+        template: `
+            <counter v-model.uppercase="str"/>
+        `
+    });
+    app.component('counter', {
+        props: {
+            'modelValue': String,
+            'modelModifiers': {
+                default: () => {} // 当不传递修饰符时modelModifiers默认值
+            }
+        },
+        methods: {
+            addCount() {
+                let newVlaue = this.modelValue + "b"
+                if (this.modelModifiers.uppercase) { // 判断传递的修饰符
+                    newVlaue = newVlaue.toUpperCase()
+                }
+                this.$emit('update:modelValue', newVlaue)
+            }
+        },
+        template: ` 
+        <div @click="addCount">{{modelValue}}</div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+
+</html>

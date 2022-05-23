@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 20</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // slot 插槽
+    // 父模板里调用的数据属性, 使用的是父模板里的数据
+    // 子模板里调用的数据属性, 使用的是子模板里的数据
+    // const app = Vue.createApp({
+    //     data() {
+    //         return {
+    //             text: "提交"
+    //         }
+    //     },
+    //     template: `
+    //         <myform>
+    //             <button>{{text}}</button>
+    //         </myform>
+    //         <myform>
+    //             <div>提交</div>
+    //         </myform>
+    //         <myform>
+    //             123
+    //         </myform>
+    //         <myform>
+    //             <test/>
+    //         </myform>
+    //         <myform>
+    //         </myform>
+    //     `
+    // });
+    // app.component('myform', {
+
+    //     methods: {
+    //         handleClick() {
+    //             alert(123)
+    //         }
+    //     },
+    //     template: ` 
+    //     <div>
+    //         <input/><span @click="handleClick"><slot>default value</slot></span>
+    //     </div>
+    //     `
+    // })
+    // app.component('test', {
+    //     template: `<div>123</div>`
+    // })
+
+    // 具名插槽
+    const app = Vue.createApp({
+        template: `
+            <myform>
+                <template v-slot:header>
+                    <div>header</div>
+                </template>
+                <template #footer>
+                    <div>footer</div>
+                </template>
+            </myform>
+        `
+    });
+    app.component('myform', {
+        template: ` 
+        <div>
+            <slot name="header"></slot>
+            <div>content</div>
+            <slot name="footer"></slot>
+        </div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+
+</html>

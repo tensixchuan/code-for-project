@@ -1121,7 +1121,7 @@ v-bind="params" 等价于 :n="params.n"   :a="params.a"  :b="params.b"
 
 
 
-### 4-5 父子组件间通过事件通信
+### 3-5 父子组件间通过事件通信
 
 #### this.$emit()
 
@@ -1195,6 +1195,350 @@ emits可以用来放要触发的事件，emits:['addNum'] 或 emits:{addNum: ()=
 ```
 
 父组件v-model传值，子组件this.$emit('update:值'，新值)
+
+注：
+
+1. 双向绑定多个参数：` <counter v-model:count="count" v-model:count1="time"/>`
+
+2. modelModifiers 修饰符
+
+```
+const app = Vue.createApp({
+        data() {
+            return {
+                str: 'ab'
+            }
+        },
+        template: `
+            <counter v-model.uppercase="str"/>
+        `
+    });
+    app.component('counter', {
+        props: {
+            'modelValue': String,
+            'modelModifiers': {
+                default: () => {} // 当不传递修饰符时modelModifiers默认值
+            }
+        },
+        methods: {
+            addCount() {
+                let newVlaue = this.modelValue + "b"
+                if (this.modelModifiers.uppercase) { // 判断传递的修饰符
+                    newVlaue = newVlaue.toUpperCase()
+                }
+                this.$emit('update:modelValue', newVlaue)
+            }
+        },
+        template: ` 
+        <div @click="addCount">{{modelValue}}</div>
+        `
+    })
+```
+
+### 3-6 使用插槽和具名插槽解决组件内容传递问题
+
+#### 插槽
+
+可以使用插槽传自定义标签、字符串、组件，可以在子组件模板中用`<slot/>`代替父组件中组件插入的东西。
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                str: 'ab'
+            }
+        },
+        template: `
+            <myform>
+                <button>提交</button>
+            </myform>
+            <myform>
+                <div>提交</div>
+            </myform>
+            <myform>
+                123
+            </myform>
+            <myform>
+                <test/>
+            </myform>
+            <myform></myform>
+        `
+    });
+    app.component('myform', {
+        methods: {
+            handleClick() {
+                alert(123)
+            }
+        },
+        template: ` 
+        <div>
+            <input/><span @click="handleClick"><slot>default value</slot></span>
+        </div>
+        `
+    })
+    app.component('test', {
+        template: `<div>123</div>`
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+![image-20220523203704493](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220523203704493.png)
+
+注：
+
+- 父模板里调用的数据属性, 使用的是父模板里的数据
+
+- 子模板里调用的数据属性, 使用的是子模板里的数据
+- 没有传入slot时可以指定默认值，有slot用slot，没有用默认值
+
+#### 具名插槽
+
+可以用v-slot指定slot的名字`v-slot:名字`，用template占位。然后子组件中指定`name="名字"`。使用具名插槽对插槽进行拆分会更加灵活。
+
+```
+<script>
+    const app = Vue.createApp({
+        template: `
+            <myform>
+                <template v-slot:header>
+                    <div>header</div>
+                </template>
+                <template #footer>
+                    <div>footer</div>
+                </template>
+            </myform>
+        `
+    });
+    app.component('myform', {
+        template: ` 
+        <div>
+            <slot name="header"></slot>
+            <div>content</div>
+            <slot name="footer"></slot>
+        </div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+可以用#缩写，`v-slot:header` 等价于 `#header`
+
+#### 作用域插槽
+
+作用域插槽使得父组件能够调用子组件作用域内的值。
+
+```
+// 作用域插槽
+const app = Vue.createApp({
+	data() {
+		return {
+			text: "提交"
+		}
+	},
+	template: `
+		<list v-slot="slotProps">
+			<div>{{slotProps.item}}</div>
+		</list>
+        `
+});
+app.component('list', {
+        data() {
+            return {
+                list: [1, 2, 3]
+            }
+        },
+        template: ` 
+        <div>
+            <slot v-for="item in list" :item="item"></slot>
+        </div>
+        `
+})
+```
+
+这里父组件调用子组件时传入slot，子组件循环调用slot时以属性的形式传递值到父组件，父组件通过slotProps对象接收所有slot传来的值。
+
+注：还可以使用对象的解构去简写
+
+```
+<list v-slot="{item}">
+	<div>{{item}}</div>
+</list>
+```
+
+
+
+### 3-7 动态组件和异步组件
+
+#### 动态组件
+
+使用动态组件前，如果要动态地展示组件：
+
+```
+<script>
+    // 动态组件
+    const app = Vue.createApp({
+        data() {
+            return {
+                currentItem: "commen-item"
+            }
+        },
+        methods: {
+            handleClick() {
+                console.log(this.currentItem)
+                this.currentItem = this.currentItem === "input-item" ? "commen-item" : "input-item"
+                console.log(this.currentItem)
+            }
+        },
+        template: `
+            <input-item v-show="currentItem==='input-item'"/>
+            <commen-item v-show="currentItem==='commen-item'"/>
+            <button @click="handleClick">切换</button>
+        `
+    });
+    app.component('input-item', {
+        template: ` 
+        <input/>
+        `
+    })
+    app.component('commen-item', {
+        template: ` 
+        <div>hello world</div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+```
+
+这里定义了两个组件，分别通过父组件中的变量currentItem来判断当前展示与否
+
+使用动态组件来简写：
+
+```
+template: `
+	<component :is="currentItem"/>
+	<button @click="handleClick">切换</button>
+`
+```
+
+注：这里切换时会清除变动的历史，可以使用keep-alive包裹，去保持状态。
+
+#### 异步组件
+
+异步组件会异步地实现组件的逻辑
+
+```
+// 异步组件
+    const app = Vue.createApp({
+        template: `
+            <commen-item/>
+            <async-commen-item/>
+        `
+    });
+    app.component('commen-item', {
+        template: `<div>hello world</div>`
+    })
+    app.component('async-commen-item', Vue.defineAsyncComponent(() => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve({
+                    template: `<div>This is an async component</div>`
+                })
+            }, 3000)
+        })
+    }))
+
+    const vm = app.mount('#root')
+```
+
+首先定义组件名，然后调用Vue.defineAsyncComponent方法，传入一个函数，返回一个Promise。这里会隔3s后再显示组件。
+
+### 3-8 其他知识点
+
+#### v-once 让某个元素标签只渲染一次，即使数据发生了改变
+
+#### ref 获取 Dom 节点/组件引用
+
+```
+<script>
+    // ref 实际上是获取 Dom 节点/组件引用的方法
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        mounted() {
+            console.log(this.$refs.count) // <div>1</div>
+            console.log(this.$refs.commen.sayHello()) //hello
+        },
+        template: `
+            <div>
+                <div ref="count">{{count}}</div>
+                <commen-item ref="commen">commen-item</commen-item>
+            </div>
+        `
+    });
+    app.component('commen-item', {
+        methods: {
+            sayHello() {
+                alert("hello")
+                return "hello"
+            }
+        },
+        template: ` 
+        <div>hello world</div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+```
+
+#### provide / inject 实现跨组件多级之间的传递
+
+```
+// provide / inject 跨组件多级之间的传递
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        // provide: {
+        //     count: 1
+        // },
+        provide() { // 传data中的值时需要写成函数形式
+            return {
+                count: this.count
+            }
+        },
+        template: `
+            <div>
+                <child :count="count"/>
+            </div>
+        `
+    }).mount('#root');
+    app.component('child', {
+        template: ` 
+        <div></div>
+        <child-child/>
+        `
+    })
+    app.component('child-child', {
+        inject: ['count'],
+        template: ` 
+        <div>{{count}}</div>
+        `
+    })
+```
+
+provide:{}传值，inject:[]接收值
+
+注：传data中的值时provide需要写成函数形式 provide(){return {}}
 
 ## 第4章 Vue 中的动画
 

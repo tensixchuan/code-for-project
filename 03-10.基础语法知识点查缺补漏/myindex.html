@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 22</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // v-once 让某个元素标签只渲染一次，即使数据发生了改变
+    // ref 实际上是获取 Dom 节点/组件引用的一个语法
+    // const app = Vue.createApp({
+    //     data() {
+    //         return {
+    //             count: 1
+    //         }
+    //     },
+    //     mounted() {
+    //         console.log(this.$refs.count) // <div>1</div>
+    //         console.log(this.$refs.commen.sayHello()) //hello
+    //     },
+    //     template: `
+    //         <div>
+    //             <div ref="count">{{count}}</div>
+    //             <commen-item ref="commen">commen-item</commen-item>
+    //         </div>
+    //     `
+    // });
+    // app.component('commen-item', {
+    //     methods: {
+    //         sayHello() {
+    //             alert("hello")
+    //             return "hello"
+    //         }
+    //     },
+    //     template: ` 
+    //     <div>hello world</div>
+    //     `
+    // })
+
+    // provide / inject 跨组件多级之间的传递
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        // provide: {
+        //     count: 1
+        // },
+        provide() { // 传data中的值时需要写成函数形式
+            return {
+                count: this.count
+            }
+        },
+        template: `
+            <div>
+                <child :count="count"/>
+            </div>
+        `
+    });
+    app.component('child', {
+        template: ` 
+        <div></div>
+        <child-child/>
+        `
+    })
+    app.component('child-child', {
+        inject: ['count'],
+        template: ` 
+        <div>{{count}}</div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>
