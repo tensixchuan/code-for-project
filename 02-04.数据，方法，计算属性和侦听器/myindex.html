@@ -16,38 +16,18 @@
     const app = Vue.createApp({
         data() {
             return {
+                htmlMssage: "<strong>hello</strong>",
                 message: 'hello',
-                count: 1,
-                price: 5
+                disable: true,
+                show: true
             }
         },
-        // data & methods & computed & watcher
-        // computed 和 methods 都能实现的功能，建议使用 computed, 因为有缓存
-        // computed 和 watch 都能实现的功能，建议使用 computed, 因为更简洁
-        watch: {
-            // price发生变化时会执行
-            price(curent, prev) {
-                console.log("price changed from", prev, "to", curent)
-            }
-        },
-        computed: {
-            // 当计算属性依赖的内容发生变化时，才会重新计算
-            total() {
-                return this.count * this.price
-            }
-        },
-        methods: {
-            handleClick() {
-                console.log(data.message)
-            },
-            // 只要页面重新渲染，就会重新计算
-            getTotal() {
-                return this.count * this.price
-            }
-        },
-        template: `
-        <div @click="handleClick">{{total}}</div>
-        `
+        // v-html 通过html方式展示变量 <div v-html="htmlMssage"></div>
+        // v-bind 绑定值 <div v-bind:title="message">hello world</div>
+        //               <input v-bind:disabled = "disable"/>
+        // v - once 只使用一次变量，后续数据发生变化也不会重新渲染 <div v-once>{{message}}</div>
+        // v-if 是否展示 <div v-if="show">{{message}}</div>
+        template: `<div v-if="show">{{message}}</div>`
     })
     const vm = app.mount("#root")
 </script>

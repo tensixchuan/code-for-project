@@ -756,7 +756,445 @@ const vm = app.mount("#root")
 
 ## 第3章 探索组件的理念
 
+### 3-1 组件的定义及复用
 
+#### 组件的定义
+
+```
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                message: ""
+            }
+        },
+        template: `
+        <div>
+            <counter/>
+        </div>
+        `
+    })
+    app.component("counter", {
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        template: `<div @click="counter += 1">{{counter}}</div>`
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+
+
+#### 组件具备复用性
+
+```
+template: `
+	<div>
+		<counter/>
+		<counter/>
+		<counter/>
+</div>
+`
+```
+
+组件可以复用，但是组件内的数据是在当前组件内独享的，不会和同名组件共享
+
+
+
+#### 全局组件
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                message: ""
+            }
+        },
+        template: `
+        <div>
+            <counter-parent/>
+            <counter/>
+            <counter/>
+        </div>
+        `
+    })
+    app.component("counter-parent", {
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        template: `<conter/>`
+    })
+    app.component("counter", {
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        template: `<div @click="counter += 1">{{counter}}</div>`
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+全局组件：只要定义了就处处可用，性能不高，但使用简单
+
+通过app.component定义的组件为全局组件，可以在父组件使用，也可以在其他组件内使用。但是即使没有使用，全局组件也会挂载。
+
+
+
+#### 局部组件
+
+局部组件：定义了要注册之后才能使用，性能较高，但使用麻烦，建议首字母大写，驼峰式命名
+
+```
+<script>
+    const Counter = {
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        template: `<div @click="counter += 1">{{counter}}</div>`
+    }
+    const app = Vue.createApp({
+        components: {
+            counter: Counter
+        },
+        data() {
+            return {
+                message: ""
+            }
+        },
+        template: `
+        <div>
+            <counter/>
+            <counter/>
+        </div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+首先定义一个常量，然后在父组件中通过components声明，之后可以直接使用
+
+注：
+
+1. 局部组件使用时，要做一个名字和组件的映射对象，当key值和value值一致时可以直接组件名：组件名，不需要加引号，但是不写的话Vue底层也会自动尝试映射
+
+   ```
+   components: {
+   	Counter: Counter
+   }
+   ```
+
+   或
+
+   ```
+   components: {
+   	Counter,others...
+   }
+   ```
+
+   或
+
+   ```
+   components: {
+   	"counter": Counter
+   }
+   ```
+
+2. 局部组件命名时无法使用-，而驼峰式难以和其他变量区分，所以最好首字母大写，和其他变量区分 。
+
+   
+
+### 3-2 组件间的传值及校验
+
+#### 父子组件传值
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                num: 12
+            }
+        },
+        template: `
+        <div>
+            <test content="hello world"/>
+        </div>
+        `
+    })
+    app.component("test", {
+        props: ['content'],
+        template: `<div>{{content}}</test>`
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+父组件调用子组件的标签，然后通过标签上的属性向子组件传值，子组件通过props接收对应内容，之后就可以直接使用传递的值
+
+注：
+
+1. 静态属性：形如content="hello world"这种传递固定值的属性叫做静态属性
+
+2. 动态属性：形如content="num"这种传递动态值的属性叫做动态属性
+
+#### 类型校验：
+
+```
+app.component("test", {
+        props: {content: String},
+        template: `<div>{{content}}</test>`
+})
+```
+
+```
+app.component("test", {
+        // type: String Boolean Array Object Function
+        // required true为必填
+        // default 默认值
+        props: {
+            content: String,
+            message: {
+                type: String,
+                validator: function(value) {
+                    return value.length < 10
+                },
+                required: false,
+                default: "default"
+            }
+        },
+        template: `<div>{{content}} {{message}}</div>`
+    })
+```
+
+- type为校验的类型
+- validator为一个参数校验的函数，如果返回false会报警告
+- required 为 true 时该属性必填
+- default 默认值
+
+#### 传多个值：v-bind="params"
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                content: 123,
+                params: {
+                    n: 123,
+                    a: 456,
+                    b: 789
+                }
+            }
+        },
+        template: `
+        <div>
+            <test :content='content' v-bind="params"/>
+        </div>
+        `
+    })
+    app.component("test", {
+        // type: String Boolean Array Object Function
+        // required true为必填
+        // default 默认值
+        props: ['content','n', 'a', 'b'],
+        template: `<div>{{n}} {{a}} {{b}}</div>`
+    })
+
+    const vm = app.mount('#root')
+</script>
+```
+
+v-bind="params" 等价于 :n="params.n"   :a="params.a"  :b="params.b"
+
+注：用以-为单词间隔的字符串作为属性名传值时，接收的时候使用驼峰式，eg: 传的时候使用content-abc命名，接的时候使用contentAbc命名
+
+### 3-3 单项数据流
+
+子组件可以使用父组件传递的值，但是不能修改传递的值。可以自定义一个变量复制值，然后修改自定义的变量。
+
+```
+<script>
+    const app = Vue.createApp({
+            data() {
+                return {
+                    content: 123
+                }
+            },
+            template: `
+        <div>
+            <counter :count='content'/>
+        </div>
+        `
+        })
+        
+    app.component("counter", {
+        props: ['count'],
+        data() {
+            return {
+                myCount: this.count
+            }
+        },
+        template: `<div @click="myCount++">{{myCount}}</div>`
+    })
+
+    const vm = app.mount('#root')
+</script>
+```
+
+### 3-4 Non-Props
+
+父组件传递的属性子组件接收但是未使用时，Dom 标签内并不会显示该属性，而父组件传递的属性子组件未接受且未使用时 Dom 标签内会显示该属性
+
+- **inheritAttrs**
+
+设置 `inheritAttrs: false`后，不会继承父组件传递的Non-Props属性，即传递的属性值未被接收时，子组件标签上不会显示传递的属性
+
+ 常用Non-Props来给子组件设置样式：
+
+```
+<script>
+    const app = Vue.createApp({
+        template: `
+            <div>
+                <counter style="color: red;"/>
+            </div>
+        `
+    });
+    app.component("counter", {
+        template: `<div>content</div>`
+    });
+
+    const vm = app.mount('#root')
+</script>
+```
+
+![image-20220522213710704](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220522213710704.png)
+
+#### $attrs
+
+- 子组件内有多个标签时，可以通过$attrs来指定接收全部属性或部分属性
+- 在生命周期函数或方法中也可以使用this.$attrs来使用父组件传递的属性
+
+```
+<script>
+    const app = Vue.createApp({
+        template: `
+            <div>
+                <counter style="color: red;"/>
+                <divs msg="hello" msg2="hello2"/>
+            </div>
+        `
+    });
+    app.component("counter", {
+        template: `<div>content</div>`
+    });
+    app.component("divs", {
+        // inheritAttrs: false,
+        mounted() {  // 使用this.$attrs来使用父组件传递的值
+            console.log(this.$attrs.msg)
+        },
+        template: `
+            <div v-bind:msg="$attrs.msg">content</div>
+            <div v-bind="$attrs">content</div>
+            <div v-bind:msg="$attrs.msg2">content</div>
+        `
+    });
+    const vm = app.mount('#root')
+</script>
+```
+
+![image-20220522215158415](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220522215158415.png)
+
+
+
+### 4-5 父子组件间通过事件通信
+
+#### this.$emit()
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        methods: {
+            handleAdd(params) {
+                this.count += params
+            }
+        },
+        template: `
+            <div>
+                {{count}}
+                <counter :count="count" @add-num="handleAdd"/>
+            </div>
+        `
+    });
+    app.component("counter", {
+        props: ['count'],
+        methods: {
+            handelItemClick() {
+                this.$emit('addNum', 2)
+            }
+        },
+        template: `<div @click="handelItemClick">{{count}}</div>`
+    });
+
+    const vm = app.mount('#root')
+</script>
+```
+
+子组件通过`this.$emit('addNum')`触发父组件的`add-num`事件
+
+#### emits
+
+emits可以用来放要触发的事件，emits:['addNum'] 或 emits:{addNum: ()=>{}} 
+
+#### 父子组件的双向绑定
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        template: `
+            <counter v-model:countItem="count"/>
+        `
+    });
+    app.component('counter', {
+        props: ['countItem'],
+        methods: {
+            add() {
+                this.$emit('update:countItem', this.countItem + 1)
+            }
+        },
+        template: `
+        <div @click="add">{{countItem}}</div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+```
+
+父组件v-model传值，子组件this.$emit('update:值'，新值)
 
 ## 第4章 Vue 中的动画
 

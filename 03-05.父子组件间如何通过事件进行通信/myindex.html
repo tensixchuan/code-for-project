@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 18</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // const app = Vue.createApp({
+    //     data() {
+    //         return {
+    //             count: 1
+    //         }
+    //     },
+    //     methods: {
+    //         handleAdd(params) {
+    //             this.count += params
+    //         }
+    //     },
+    //     template: `
+    //         <div>
+    //             {{count}}
+    //             <counter :count="count" @add-num="handleAdd"/>
+    //         </div>
+    //     `
+    // });
+    // app.component("counter", {
+    //     props: ['count'],
+    //     emits: {
+    //         addNum: (count) => {
+    //             if (count > 0) return true
+    //             return false
+    //         }
+    //     },
+    //     methods: {
+    //         handelItemClick() {
+    //             this.$emit('addNum', 2)
+    //         }
+    //     },
+    //     template: `<div @click="handelItemClick">{{count}}</div>`
+    // });
+
+    // const vm = app.mount('#root')
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        template: `
+            <counter v-model:countItem="count"/>
+        `
+    });
+    app.component('counter', {
+        props: ['countItem'],
+        methods: {
+            add() {
+                this.$emit('update:countItem', this.countItem + 1)
+            }
+        },
+        template: `
+        <div @click="add">{{countItem}}</div>
+        `
+    })
+    const vm = app.mount('#root')
+</script>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 14</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    const counter = {
+        data() {
+            return {
+                counter: 0
+            }
+        },
+        template: `<div @click="counter += 1">{{counter}}</div>`
+    }
+    const app = Vue.createApp({
+        components: {
+            counter: counter
+        },
+        data() {
+            return {
+                message: ""
+            }
+        },
+        template: `
+        <div>
+            <counter/>
+            <counter/>
+        </div>
+        `
+    })
+
+    // app.component("counter-parent", {
+    //     data() {
+    //         return {
+    //             counter: 0
+    //         }
+    //     },
+    //     template: `<conter/>`
+    // })
+    // app.component("counter", {
+    //     data() {
+    //         return {
+    //             counter: 0
+    //         }
+    //     },
+    //     template: `<div @click="counter += 1">{{counter}}</div>`
+    // })
+    const vm = app.mount('#root')
+</script>
+
+</html>

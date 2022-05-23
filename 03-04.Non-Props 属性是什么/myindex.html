@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 17</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // None-props
+    const app = Vue.createApp({
+        template: `
+            <div>
+                <counter style="color: red;"/>
+                <divs msg="hello" msg2="hello2"/>
+            </div>
+        `
+    });
+    // app.component("test", {
+    //     // type: String Boolean Array Object Function
+    //     // required true为必填
+    //     // default 默认值
+    //     props: ['content', 'n', 'a', 'b'],
+    //     template: `<div>{{content}} --- {{n}} {{a}} {{b}}</div>`
+    // })
+    app.component("counter", {
+        template: `<div>content</div>`
+    });
+    app.component("divs", {
+        // inheritAttrs: false,
+        mounted() {
+            console.log(this.$attrs)
+        },
+        template: `
+            <div v-bind:msg="$attrs.msg">content</div>
+            <div v-bind="$attrs">content</div>
+            <div v-bind:msg="$attrs.msg2">content</div>
+        `
+    });
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

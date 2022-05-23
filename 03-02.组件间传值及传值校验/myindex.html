@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 15</title>
+    <script src="https://www.unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    const app = Vue.createApp({
+            data() {
+                return {
+                    content: 123,
+                    params: {
+                        n: 123,
+                        a: 456,
+                        b: 789
+                    }
+                }
+            },
+            template: `
+        <div>
+            <counter :count='content'/>
+        </div>
+        `
+        })
+        // app.component("test", {
+        //     // type: String Boolean Array Object Function
+        //     // required true为必填
+        //     // default 默认值
+        //     props: ['content', 'n', 'a', 'b'],
+        //     template: `<div>{{content}} --- {{n}} {{a}} {{b}}</div>`
+        // })
+    app.component("counter", {
+        // type: String Boolean Array Object Function
+        // required true为必填
+        // default 默认值
+        props: ['count'],
+        data() {
+            return {
+                myCount: this.count
+            }
+        },
+        template: `<div @click="myCount++">{{myCount}}</div>`
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>
