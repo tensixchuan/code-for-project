@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/vue@next"></script>
+    <title>lesson 23</title>
+    <style>
+        /* @keyframes leftToRight {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(0px);
+            }
+        }
+        
+        .animation {
+            animation: leftToRight 3s;
+        } */
+        /* .blue {
+            background: blue
+        }
+        
+        .green {
+            background: green
+        } */
+        
+        .transition {
+            /* 缓慢过渡 */
+            transition: 2s background-color ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                animate: {
+                    transition: true,
+                    blue: true,
+                    green: false
+                },
+                styleObj: {
+                    background: 'blue'
+                }
+            }
+        },
+        methods: {
+            handleClick() {
+                this.styleObj.background = this.styleObj.background === 'blue' ? 'green' : 'blue'
+            }
+        },
+        template: `<div>
+            <div class="transition" :style="styleObj">Hello World</div>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

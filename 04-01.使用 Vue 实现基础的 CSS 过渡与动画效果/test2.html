@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        .transition {
+            transition: 2s background-color ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                styleObj: {
+                    background: 'green'
+                }
+            }
+        },
+        methods: {
+            handleClick() {
+                this.styleObj.background = this.styleObj.background === 'green' ? 'blue' : 'green'
+            }
+        },
+        template: `<div>
+            <div class="transition" :style="styleObj">Hello World</div>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

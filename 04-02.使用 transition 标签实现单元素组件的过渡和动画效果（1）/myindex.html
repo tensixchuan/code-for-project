@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 24</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        @keyframes shake {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(50px);
+            }
+        }
+        
+        .v-enter-from {
+            color: red
+        }
+        
+        .v-enter-active {
+            animation: shake 10s;
+            transition: color 3s ease-in;
+        }
+        
+        .v-leave-to {
+            color: red
+        }
+        
+        .v-leave-active {
+            animation: shake 10s;
+            transition: color 3s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        // methods: {
+        //     handleClick() {
+        //         this.show = !this.show
+        //     }
+        // },
+        // template: `<div>
+        //     <transition :duration='1000'
+        //     enter-active-class="hello"
+        //     leave-active-class="bye">
+        //         <div v-show="show" >Hello World</div>
+        //     </transition>
+        //     <button @click="handleClick">切换</button>
+        // </div>`
+
+        //js动画
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            },
+            handleBeforeEnter(el) { //刚进入
+                el.style.color = 'red'
+            },
+            handleEnterActive(el, done) { //进入
+                const animation = setInterval(() => {
+                    const color = el.style.color
+                    if (color === 'red') {
+                        el.style.color = 'green'
+                    } else {
+                        el.style.color = 'red'
+                    }
+                }, 1000)
+                setTimeout(() => {
+                    clearInterval(animation) // 动画完成
+                    done()
+                }, 5000)
+            },
+            handleEnterEnd() { // 动画结束调用
+                alert('123')
+            }
+        },
+        // - @before-enter，接收el参数
+        // - @enter，接收 el done 参数，done()表示已执行完
+        // - @after-enter，接收 el
+        // - @before-leave，接收 el
+        // - @leave，接收 el done
+        // - @after-leave，接收 el
+        template: `<div>
+            <transition 
+                :css='false'
+                @before-enter="handleBeforeEnter"
+                @enter="handleEnterActive"
+                @after-enter="handleEnterEnd">
+                <div v-show="show" >Hello World</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

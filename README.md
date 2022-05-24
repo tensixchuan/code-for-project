@@ -1542,6 +1542,524 @@ provide:{}传值，inject:[]接收值
 
 ## 第4章 Vue 中的动画
 
+### 4-1 使用Vue实现基础CSS动画过渡
+
+- 设置左右移动动画
+
+```
+<style>
+        @keyframes leftToRight {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(0px);
+            }
+        }
+        
+        .animation {
+            animation: leftToRight 3s;
+        }
+    </style>
+```
+
+```
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                animate: {
+                    animation: false
+                }
+            }
+        },
+        methods: {
+            handleClick() {
+                this.animate.animation = !this.animate.animation
+            }
+        },
+        template: `<div>
+            <div :class="animate">Hello World</div>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+- 设置缓慢过渡动画
+
+```
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        .transition {
+            transition: 2s background-color ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                styleObj: {
+                    background: 'green'
+                }
+            }
+        },
+        methods: {
+            handleClick() {
+                this.styleObj.background = this.styleObj.background === 'green' ? 'blue' : 'green'
+            }
+        },
+        template: `<div>
+            <div class="transition" :style="styleObj">Hello World</div>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+### 4-2 使用transition标签实现单元素组件的过渡和动画效果
+
+```
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        @keyframes shake {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(50px);
+            }
+        }
+        
+        .v-enter-active {
+            animation: shake 3s;
+        }
+        
+        .v-leave-active {
+            animation: shake 3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<div>
+            <transition>
+                <div v-if="show" >Hello World</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+注：
+
+1. transition中不写name时v-enter-active这样的样式默认以v开头，如果自定义了name="hello"，则重写样式时应以hello开头：hello-enter-active
+
+2. 可以在transition中重写v-enter-active，如`<transition enter-active-class=“hello> </transition>`, 然后样式中可以用hello代替v-enter-active
+
+3. 还可以引入animate动画效果库
+
+   安装：`$ npm install animate.css --save`
+
+   头部引入：
+
+   ```
+   <head>
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+   </head>
+   ```
+
+   使用：
+
+   ```
+   template: `<div>
+               <transition 
+               enter-active-class="animate__animated animate__bounce"
+               leave-active-class="animate__animated animate__flash">
+                   <div v-show="show" >Hello World</div>
+               </transition>
+               <button @click="handleClick">切换</button>
+           </div>`
+   ```
+
+   
+
+[animate动画效果库]: https://animate.style/
+
+animate动画效果库：https://animate.style/
+
+#### 同时动画和过渡：
+
+```
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 24</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        @keyframes shake {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(50px);
+            }
+        }
+        
+        .v-enter-from {
+            color: red
+        }
+        
+        .hello {
+            animation: shake 3s;
+            transition: color 3s ease-in;
+        }
+        
+        .v-leave-to {
+            color: red
+        }
+        
+        .bye {
+            animation: shake 3s;
+            transition: color 3s ease-out;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<div>
+            <transition 
+            enter-active-class="hello"
+            leave-active-class="bye">
+                <div v-show="show" >Hello World</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+注：当有多种时可以设置 type="transition" 使动画以渐变为主，当渐变先完成时，其他动画立即完成，还可以设置:duration="1000"使得动画全部在1s内完成
+
+`:duration="1000"`
+
+`:duration="{enter:2000,leave:1000}"`
+
+`:css='false'` 不使用css动画
+
+#### 使用js动画
+
+```
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        //js动画
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            },
+            handleBeforeEnter(el) { //刚进入
+                el.style.color = 'red'
+            },
+            handleEnterActive(el, done) { //进入
+                const animation = setInterval(() => {
+                    const color = el.style.color
+                    if (color === 'red') {
+                        el.style.color = 'green'
+                    } else {
+                        el.style.color = 'red'
+                    }
+                }, 1000)
+                setTimeout(() => {
+                    clearInterval(animation)
+                    done()
+                }, 5000)
+            },
+            handleEnterEnd() { // 动画结束调用
+                alert('123')
+            }
+        },
+        // - @before-enter，接收el参数
+        // - @enter，接收 el done 参数，done()表示已执行完
+        // - @after-enter，接收 el
+        // - @before-leave，接收 el
+        // - @leave，接收 el done
+        // - @after-leave，接收 el
+        template: `<div>
+            <transition 
+                :css='false'
+                @before-enter="handleBeforeEnter"
+                @enter="handleEnterActive"
+                @after-enter="handleEnterEnd">
+                <div v-show="show" >Hello World</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+
+
+- @before-enter，接收el参数
+- @enter，接收 el done 参数，done()表示已执行完
+- @after-enter，接收 el
+- @before-leave，接收 el
+- @leave，接收 el done
+- @after-leave，接收 el
+
+### 4-3 组件和元素切换动画
+
+#### 多个单元素的切换
+
+```
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 24</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        .v-enter-from {
+            opacity: 0
+        }
+        
+        .v-enter-active,
+        .v-leave-active {
+            transition: opacity 1s ease-in;
+        }
+        
+        .v-enter-to {
+            opacity: 1
+        }
+        
+        .v-leave-from {
+            opacity: 1
+        }
+        
+        .v-leave-to {
+            opacity: 0
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        //js动画
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<div>
+            <transition mode="out-in" appear>
+                <div v-if="show">hello world</div>
+                <div v-else="show">bye world</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+transition中mode="out-in"设置动画顺序为先消失后出现，否则会同时执行
+
+appear设置初次出现时也使用动画
+
+#### 多个单组件的切换
+
+```
+<script>
+    // 多个单组件的切换
+    const componentA = {
+        template: `
+            <div>hello world</div>
+        `
+    }
+    const componentB = {
+        template: `
+            <div>bye world</div>
+        `
+    }
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        components: {
+            'component-a': componentA,
+            'component-b': componentB
+        },
+        template: `<div>
+            <transition mode="out-in" appear>
+                <component-a v-if="show"/>
+                <component-b v-else="show"/>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>
+```
+
+也可以通过is 用动态组件
+
+```
+        methods: {
+            handleClick() {
+                this.component = this.component === 'component-a' ? 'component-b' : "component-a"
+            }
+        },
+        components: {
+            'component-a': componentA,
+            'component-b': componentB
+        },
+        template: `<div>
+            <transition mode="out-in" appear>
+                <component :is="component"/>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+```
+
+### 4-4 列表动画
+
+```
+<style>
+        .list-item {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .v-enter-from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .v-enter-active {
+            transition: all 1s ease-in;
+        }
+        
+        .v-move {
+            transition: all .5s ease-in;
+        }
+    </style>
+```
+
+```
+<script>
+    // 列表动画的实现
+    const app = Vue.createApp({
+        data() {
+            return {
+                list: [1, 2, 3]
+            }
+        },
+        methods: {
+            handleClick() {
+                this.list.unshift(this.list.length + 1)
+            }
+        },
+        template: `<div>
+            <transition-group >
+                <span class="list-item" v-for="item in list" :key="item">{{item}}</span>
+            
+            </transition-group>
+            <button @click="handleClick">增加</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
 
 
 ## 第5章 Vue 中的高级语法

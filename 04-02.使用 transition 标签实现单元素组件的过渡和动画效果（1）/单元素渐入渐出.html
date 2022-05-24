@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        .v-enter-from {
+            opacity: 0
+        }
+        
+        .v-enter-active {
+            transition: opacity 2s ease-out;
+        }
+        /* .v-enter-to {
+            opacity: 1
+        } */
+        
+        .v-leave-from {
+            opacity: 1
+        }
+        
+        .v-leave-active {
+            transition: opacity 2s ease-out;
+        }
+        /* .v-leave-to {
+            opacity: 0
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 过渡 动画
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<div>
+            <transition>
+                <div v-if="show" >Hello World</div>
+            </transition>
+            <button @click="handleClick">切换</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>
