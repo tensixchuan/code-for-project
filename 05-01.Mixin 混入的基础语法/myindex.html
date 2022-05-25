@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 24</title>
+    <script src="https://unpkg.com/vue@next"></script>
+
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // Mixin 可以将数据、生命周期函数、方法混入组件或应用中
+    // 组件 data/methods 优先级高于mixin data/methods 优先级，同时存在时组件data/methods会覆盖mixin data/methods
+    // mixin中的生命周期函数和组件的生命周期函数同时存在时，先执行mixin里的，再执行组件里的，不会被覆盖掉
+    // 自定义属性，组件中的属性优先级高于mixin属性优先级
+    //             data中的属性可以直接{{number}}取，自定义的属性可以{{this.$options.number}}取
+    const myMixin = { // 局部mixin
+        number: 3,
+        data() {
+            return {
+                number: 1,
+                count: 0
+            }
+        },
+        methods: {
+            handleClick() {
+                console.log("mixin")
+            }
+        },
+
+    }
+    const app = Vue.createApp({
+            data() {
+                return {
+                    number: 2
+                }
+            },
+            number: 4,
+            mixins: [myMixin],
+            methods: {
+                handleClick() {
+                    console.log("handleClick")
+                }
+            },
+            template: `<div>
+            <div>{{this.$options.number}}</div>
+            <child/>
+            <button @click="handleClick">增加</button>
+        </div>`
+        })
+        // app.mixin({  // 全局mixin
+        //     data() {
+        //         return {
+        //             number: 2,
+        //             count: 0
+        //         }
+        //     },
+        //     methods: {
+        //         handleClick() {
+        //             console.log("mixin")
+        //         }
+        //     },
+        // })
+    app.component("child", {
+        mixins: [myMixin],
+        template: `<div>
+            <div>{{count}}</div>
+        </div>`
+    })
+    app.config.optionMergeStrategies.number = (mixinVal, appValue) => {
+        return mixinVal || appValue
+    }
+    const vm = app.mount("#root")
+</script>
+
+</html>

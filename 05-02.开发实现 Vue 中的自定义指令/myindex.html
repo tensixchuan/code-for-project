@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 29</title>
+    <script src="https://unpkg.com/vue@next"></script>
+    <style>
+        .header {
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 自定义指令 directive
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: true,
+                top: 400
+            }
+        },
+        template: `<div v-pos:top="top" class='header'>
+            <input v-focus/>
+            <div v-pos:left="500" class='header'>11</div>
+        </div>`
+    });
+    // app.directive('pos', {
+    //     mounted(el, binding) {
+    //         el.style.top = binding.value + 'px'
+    //     },
+    //     updated(el, binding) {
+    //         el.style.top = binding.value + 'px'
+    //     },
+    // })
+
+    app.directive('pos', (el, binding) => { //简写形式，代表mounted和updated处理的事件
+        el.style[binding.arg] = binding.value + 'px'
+    })
+
+    app.directive('focus', { // 全局指令
+        beforeMount(el) {
+            console.log("beforeMount")
+        },
+        mounted(el) {
+            console.log("mounted")
+            el.focus()
+        },
+        beforeUpdate() {
+            console.log("beforeUpdate")
+        },
+        updated() {
+            console.log("updated")
+        },
+        beforeUnmount(el) {
+            console.log("beforeUnmount")
+        },
+        unmounted(el) {
+            console.log("unmounted")
+        }
+    })
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

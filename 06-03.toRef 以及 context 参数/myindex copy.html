@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 25</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        methods: {
+            handleChange() {
+                console.log("handleChange")
+            }
+        },
+        template: `<child app='app' @change="handleChange">parent</child>`
+    });
+    app.component("child", {
+
+        mounted() {
+            console.log(this.$slots)
+            this.$emit('change')
+        },
+        template: `<div>child</div>`,
+
+        //attrs 取的是父组件传来的属性(不传值的话是None-Props)
+        setup(props, context) {
+            const {
+                h
+            } = Vue
+            const {
+                attrs,
+                slots,
+                emit
+            } = context
+
+            function handleClick() {
+                emit('change')
+            }
+            console.log(attrs.app)
+            console.log(slots.default())
+            return () => h('div', {}, slots.default())
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

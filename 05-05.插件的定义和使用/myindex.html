@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 32</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // plugin 插件,把通用性的功能封装起来
+    const myPlugin = {
+        install(app, options) { // app为使用插件的实例,options为传入的参数
+            app.provide('name', "wd")
+            app.directive("focus", el => {
+                el.focus()
+            })
+            app.mixin({
+                mounted() {
+                    console.log('mixin')
+                }
+            })
+            app.config.globalProperties.$sayHello = "hello"
+            console.log(app)
+            console.log(options)
+        }
+    }
+    const app = Vue.createApp({
+        template: `<my-title/>`
+    });
+
+    app.component('my-title', {
+        inject: ['name'],
+        mounted() {
+            console.log(this.$sayHello)
+        },
+        template: `<div><input v-focus></input>{{name}}</div>`
+    })
+    app.use(myPlugin, {
+        name: "wd"
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

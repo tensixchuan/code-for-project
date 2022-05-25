@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 25</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // ref reactive 响应式的应用
+    // 原理: 通过proxy 对数据进行封装,当数据变化时, 触发模板等内容的更新
+    // ref 处理基础类型的数据
+    // toRefs 响应式解构
+    const app = Vue.createApp({
+        setup(props, context) {
+            const {
+                reactive,
+                toRef,
+                toRefs
+            } = Vue;
+            // proxy, {name: "dell"}变成proxy( {name: "dell"})这样的响应式引用
+            const data = reactive({
+                name: "dell"
+            })
+            const age = toRef(data, 0)
+            setTimeout(() => {
+                age.value = 20
+            }, 2000);
+            return {
+                age
+            }
+        },
+        template: `<div>{{age}}</div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

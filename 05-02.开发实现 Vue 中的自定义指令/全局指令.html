@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 29</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 自定义指令 directive
+    // 全局指令
+    const app = Vue.createApp({
+        template: `<div>
+            <input v-focus/>
+        </div>`
+    })
+    app.directive('focus', { // 全局指令
+        mounted(el) {
+            el.focus()
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+
+</html>

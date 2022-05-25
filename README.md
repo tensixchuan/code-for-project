@@ -2060,13 +2060,830 @@ appear设置初次出现时也使用动画
 </script>
 ```
 
+### 4-5 状态动画
+
+通过数据控制Dom的显示
+
+```
+<script>
+    // 状态动画 svg
+    const app = Vue.createApp({
+        data() {
+            return {
+                number: 0,
+                animateNubmer: 1
+            }
+        },
+        methods: {
+            handleClick() {
+                this.number += 10
+                const animation = setInterval(() => {
+                    this.animateNubmer++;
+                    if (this.animateNubmer >= this.number) {
+                        clearInterval(animation)
+                    }
+                }, 100)
+            }
+        },
+        template: `<div>
+            <div>{{animateNubmer}}</div>
+            <button @click="handleClick">增加</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
 
 
 ## 第5章 Vue 中的高级语法
 
+### 5-1 Mixin
+
+```
+<script>
+    const myMixin = { // 局部mixin
+        data() {
+            return {
+                number: 2
+            }
+        },
+        methods: {
+            handleClick() {
+                console.log("mixin")
+            }
+        }
+    }
+    const app = Vue.createApp({
+        // data() {
+        //     return {
+        //         number: 1
+        //     }
+        // },
+        mixins: [myMixin],
+        methods: {
+            handleClick() {
+                console.log("handleClick")
+            }
+        },
+        template: `<div>
+            <div>{{number}}</div>
+            <button @click="handleClick">增加</button>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+首先定义一个对象，然后在组件中将对象加入 `mixins: [myMixin]` ，将对象注入到组件中
+
+Mixin 可以将数据、方法、生命周期函数混入组件或应用中:
+
+- 组件 **data/methods** 优先级高于mixin data/methods 优先级，同时存在时组件data/methods会覆盖mixin data/methods
+
+- mixin中的**生命周期函数**和组件的生命周期函数同时存在时，先执行mixin里的，再执行组件里的，不会被覆盖掉
+- **自定义属性**，组件中的属性优先级高于mixin属性优先级
+
+#### 局部mixin和全局mixin
+
+像上面那样在外部定义的mixin为局部mixin，需要在组件内通过mixins:[]注入才能使用，而全局mixin可以app.mixin()定义后全局使用（不推荐）
+
+```
+<script>
+    const app = Vue.createApp({
+        methods: {
+            handleClick() {
+                console.log("handleClick")
+            }
+        },
+        template: `<div>
+            <div>{{number}}</div>
+            <child/>
+        </div>`
+    })
+    app.mixin({ // 定义全局mixin
+        data() {
+            return {
+                number: 2,
+                count: 0
+            }
+        },
+        methods: {
+            handleClick() {
+                console.log("mixin")
+            }
+        },
+    })
+    app.component("child", {
+        template: `<div>
+            <div>{{count}}</div>
+        </div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+可以通过app.mixin()定义全局mixin，传入参数为一个对象，这样在所有组件应用中都可以使用这个全局mixin中的数据和方法
+
+#### 配置自定义属性优先级
+
+data中的属性可以直接{{number}}取，自定义的属性可以{{this.$options.number}}取。组件中的属性优先级高于mixin属性优先级，但是可以通过app.config.optionMergeStrategies.自定义属性来配置
+
+```
+app.config.optionMergeStrategies.number = (mixinVal, appValue) => {
+        return mixinVal || appValue
+}
+```
+
+对于number属性，有mixin时先取mixinVal，没有时取appValue
+
+vue3之后不推荐mixin，因为可维护性低，逻辑上看起来不清晰，数据的定位复杂（组件、mixin、优先级），全局mixin影响范围很大
+
+### 5-2 Vue自定义指令
+
+定义一个输入框， 如果要让它自动聚焦，需要给定ref name，然后在mouted钩子函数中写focus()
+
+```
+<script>
+	const app = Vue.createApp({
+        mounted() {
+            this.$refs.input.focus()
+        },
+        template: `<div>
+            <input ref="input"/>
+        </div>`
+    })
+
+    const vm = app.mount("#root")
+</script>
+```
+
+但是这种方法无法复用，而使用自定义指令可以很好的复用
+
+#### 全局指令：
+
+```
+<script>
+    // 自定义指令 directive
+	// 全局指令
+    const app = Vue.createApp({
+        template: `<div>
+            <input v-focus/>
+        </div>`
+    })
+    app.directive('focus', { // 全局指令
+        mounted(el) {
+            el.focus()
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+#### 局部指令：
+
+```
+<script>
+    // 自定义指令 directive
+    // 全局指令
+    const app = Vue.createApp({
+        template: `<div>
+            <input v-focus/>
+        </div>`
+    })
+    app.directive('focus', { // 全局指令
+        mounted(el) {
+            el.focus()
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+#### 指令的生命周期函数：
+
+```
+app.directive('focus', { 
+        beforeMount(el) {
+            console.log("beforeMount")
+        },
+        mounted(el) {
+            console.log("mounted")
+            el.focus()
+        },
+        beforeUpdate() {
+            console.log("beforeUpdate")
+        },
+        updated() {
+            console.log("updated")
+        },
+        beforeUnmount(el) {
+            console.log("beforeUnmount")
+        },
+        unmounted(el) {
+            console.log("unmounted")
+        }
+    })
+```
+
+- beforeCreate
+- created
+- beforeMount
+- mounted
+- beforeUpdate
+- updated
+- beforeUnmount
+- unmounted
+
+如果mounted和updated要处理的事件一致，可以简写到一起：
+
+```
+template: `<div v-pos="200" class='header'>
+            <input v-focus/>
+	</div>`
+```
+
+
+
+```
+app.directive('pos', { // top=200px
+        mounted(el, binding) {
+            el.style.top = binding.value + 'px'
+        },
+        updated(el, binding) {
+            el.style.top = binding.value + 'px'
+        },
+    })
+```
+
+这里binding.value为指令传递的值，mounted和updated还可以写在一起，默认第二个参数为要mounted和updated处理的事件
+
+```
+app.directive('pos', (el, binding) => { //简写形式，代表mounted和updated处理的事件
+        el.style.top = binding.value + 'px'
+})
+```
+
+
+
+#### 指令的参数和值
+
+指令除了v-pos="200"这样的形式，还可以指定参数，如：v-pos:top="200"
+
+```
+<script>
+    // 自定义指令 directive
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: true,
+                top: 300
+            }
+        },
+        template: `<div v-pos:top="top" class='header'>
+            <input v-focus/>
+            <div v-pos:left="500" class='header'>11</div>
+        </div>`
+    });
+
+    app.directive('pos', (el, binding) => { //简写形式，代表mounted和updated处理的事件
+        el.style[binding.arg] = binding.value + 'px'
+    })
+
+    const vm = app.mount("#root")
+</script>
+```
+
+binding.arg为指令的参数， binding.value为指令传递的值
+
+### 5-3 Teleport 传送门
+
+可以把组件传送到指定位置，常用来实现一些模态框、蒙层、吸底等效果，放在body或html下
+
+```
+<style>
+        .area {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            background: green;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .mask {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: black;
+            opacity: 0.2;
+            color: white;
+            font-size: 100px;
+        }
+    </style>
+```
+
+```
+<script>
+    // teleport 传送门
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<div class='area'>
+            <teleport to="body">
+                <div class="mask" v-show="show">123</div>
+            </teleport>
+            <button @click="handleClick">按钮</button>
+            
+        </div>`
+    });
+
+
+    const vm = app.mount("#root")
+</script>
+```
+
+![image-20220525151625159](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220525151625159.png)
+
+mask本来在area内，通过传送门可以传到body下，实现整体的蒙版
+
+### 5-4 更底层的render函数
+
+```
+<script>
+    // render 函数  
+    // template在底层编译后会生成render函数，render函数返回虚拟Dom（Dom节点的JS表示）
+
+    const app = Vue.createApp({
+        template: `<my-title level="3"> hello wo </my-title>`
+    });
+
+    app.component('my-title', {
+        props: ["level"], // 
+        render() {
+            // h函数返回虚拟Dom节点
+            // 第一个参数为tagName
+            // 第二个参数为attributes, 表示标签上定义的属性
+            // 第三个参数为节点对应的文本内容
+
+            // template -> render -> h ->虚拟Dom ->真实Dom ->展示到页面
+            const {
+                h
+            } = Vue;
+            // return h("h" + this.level, {}, this.$slots.default())
+
+            // h的嵌套
+            return h("h" + this.level, {}, [this.$slots.default(), h('h4', {}, "dell")])
+        }
+    })
+
+    const vm = app.mount("#root")
+</script>
+```
+
+
+
+### 5-5 插件的定义和使用
+
+#### 插件的定义：
+
+对象里里面加一个install，install传入app和options，app为使用插件的实例,options为传入的参数
+
+```
+ // plugin 插件,把通用性的功能封装起来
+    const myPlugin = {
+        install(app, options) { // app为使用插件的实例,options为传入的参数
+            app.provide('name', "wd")
+            app.directive("focus", el => {
+                el.focus()
+            })
+            app.mixin({
+                mounted() {
+                    console.log('mixin')
+                }
+            })
+            app.config.globalProperties.$sayHello = "hello"
+            console.log(app)
+            console.log(options)
+        }
+    }
+```
+
+#### 插件的使用：
+
+直接app.use("插件名",传入的参数)
+
+```
+const app = Vue.createApp({
+
+        template: `<my-title/>`
+    });
+
+    app.component('my-title', {
+        inject: ['name'],
+        mounted() {
+            console.log(this.$sayHello)
+        },
+        template: `<div><input v-focus></input>{{name}}</div>`
+    })
+    app.use(myPlugin, {
+        name: "wd"
+    })
+```
+
+
+
+### 5-6 数据校验插件开发实例
+
+#### 用mixin对数据做校验
+
+```
+<script>
+    // 用mixin对数据做校验
+    const app = Vue.createApp({
+        data() {
+            return {
+                name: "dell",
+                age: 21
+            }
+        },
+        rules: {
+            age: {
+                validate: age => {
+                    return age > 25
+                },
+                message: "too young"
+            },
+            name: {
+                validate: name => {
+                    return name.length <= 10
+                },
+                message: "too long"
+            }
+        },
+        template: `<div>{{name}}--{{age}}</div>`
+    });
+
+    app.mixin({
+        created() {
+            for (let key in this.$options.rules) {
+                const item = this.$options.rules[key]
+                console.log(this)
+                this.$watch(key, value => {
+                    console.log(value)
+                    const result = item.validate(value)
+                    if (!result) console.log(item.message)
+                })
+            }
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+在vue中定义规则，然后使用全局mixin, 在created生命周期函数内，this.$options.relues取出自定义属性rules，对数据项依次校验，this.$watch监听key属性值的变化，每次变化对value进行校验，如果数据不合格则打印相应提示信息
+
+#### 用plugin 封装
+
+```
+const validatorPlugin = (app, options) => {
+        app.mixin({
+            created() {
+                for (let key in this.$options.rules) {
+                    const item = this.$options.rules[key]
+                    console.log(this)
+                    this.$watch(key, value => {
+                        console.log(value)
+                        const result = item.validate(value)
+                        if (!result) console.log(item.message)
+                    })
+                }
+            }
+        })
+    }
+ // ......
+ 
+ app.use(validatorPlugin)
+```
+
 
 
 ## 第6章 Composition API
+
+### 6-1 setup函数的使用
+
+```
+<script>
+    const app = Vue.createApp({
+        // created 实例完全被初始化前
+        // 所以不能使用this或者外部的方法因为此时还获取不到data/methods
+        // 而其他的方法可以调用setup
+        setup(props, context) {
+            return {
+                name: "dell",
+                handleClick: () => {
+                    alert("123")
+                }
+            }
+        },
+        template: `<div @click="handleClick">{{name}}</div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+```
+
+### 6-2 ref，reactive 的响应式引用
+
+原理: 通过proxy 对数据进行封装,当数据变化时, 触发模板等内容的更新
+
+- ref 处理基础类型的数据
+- reactive  处理复杂类型的数据
+- toRefs 响应式解构数据
+
+```
+<script>
+    // ref reactive 响应式的应用
+    // 原理: 通过proxy 对数据进行封装,当数据变化时, 触发模板等内容的更新
+    // ref 处理基础类型的数据
+    const app = Vue.createApp({
+        setup(props, context) {
+            // // proxy, 'dell'变成proxy({value:'dell'})这样的响应式引用
+            // const {
+            //     ref
+            // } = Vue;
+            // let name = ref('dell')
+            // setTimeout(() => {
+            //     name.value = "wang"
+            // }, 2000)
+            // return {
+            //     name
+            // }
+            const {
+                reactive
+            } = Vue;
+            // proxy, {name: "dell"}变成proxy( {name: "dell"})这样的响应式引用
+            const nameObj = reactive({
+                name: "dell"
+            })
+            setTimeout(() => {
+                nameObj.name = "wang"
+            }, 2000)
+            return {
+                nameObj
+            }
+        },
+        template: `<div>{{nameObj.name}}</div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+```
+
+vue还提供了readonly，对响应式的引用做了限制，只能读不能改
+
+```
+const {
+                reactive,
+                readonly
+            } = Vue;
+const nameObj = reactive({
+                name: "dell"
+            })
+const readOnlyObj = readonly(nameObj)
+setTimeout(() => {
+                nameObj.name = "wang"
+                readOnlyObj.name = "wang"
+            }, 2000)
+return {
+                nameObj,
+                readOnlyObj
+            }
+```
+
+会报错`vue@next:427 [Vue warn] Set operation on key "name" failed: target is readonly.`
+
+如果直接
+
+```
+const {name} = nameObj;
+return {
+	name
+}
+```
+
+返回解构到的name，nameObj是响应式的，但是解构得到的name不是响应式，nameObj更改后返回的name还是旧的值，所以想要响应式的返回解构值，需要用到toRefs
+
+```
+const {reactive,toRefs} = Vue;
+const nameObj = reactive({name: "dell"})
+const {name} = toRefs(nameObj);
+return {name}
+```
+
+### 6-3 toRef
+
+当用toRefs取对象中没有的属性值时，toRefs不会给定默认值，后续再赋值会报错。而toRef可以给一个默认值。
+
+```
+const app = Vue.createApp({
+        setup(props, context) {
+            const {reactive,toRef} = Vue;
+            const data = reactive({
+                name: "dell"
+            })
+            const age = toRef(data, 0) // 给age一个默认值0
+            setTimeout(() => {
+                age.value = 12
+            }, 2000);
+            return {
+                age
+            }
+        },
+        template: `<div>{{age}}</div>`
+    });
+```
+
+### 6-3 context
+
+context里存放着attrs, slots,emit
+
+- attrs, 取的是父组件传来的属性(不传值的话是None-Props)
+- slots, 取的是父组件里的插槽
+- emit，触发父组件的事件
+
+在Composition API中通过slots可以实现传统的this.$slots，emit可以实现传统语法中的this.$emit，attrs可以获取传统语法中的None-Props
+
+#### attrs：
+
+```
+<script>
+    const app = Vue.createApp({
+        template: `<child app='app'>parent</child>`
+    });
+    app.component("child", {
+        template: `<div>child</div>`,
+        //attrs 取的是父组件传来的属性(不传值的话是None-Props)
+        setup(props, context) {
+            const {
+                attrs,
+                slots,
+                emit
+            } = context
+            console.log(attrs.app)// 会打印传来的"app"
+            return {}
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+#### slots：
+
+```
+<script>
+    const app = Vue.createApp({
+        methods: {
+            handleChange() {
+                console.log("handleChange")
+            }
+        },
+        template: `<child>parent</child>`
+    });
+    app.component("child", {
+
+        mounted() { // 本来可以用this.$slots取到插槽
+            console.log(this.$slots)
+        },
+        template: `<div>child</div>`,
+
+        setup(props, context) {
+            const {
+                h
+            } = Vue
+            const {
+                attrs,
+                slots,
+                emit
+            } = context
+
+            console.log(slots.default()) // 插槽的默认值
+            return () => h('div', {}, slots.default()) // 返回一个render，最终子组件会渲染出父组件插槽里的内容：parent
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+#### emit：
+
+原本子组件里this.$emit('change')，通知父组件，父组件@change="handleChange"收到后调用handleChange函数，打印"handleChange"
+
+```
+<script>
+    const app = Vue.createApp({
+        methods: {
+            handleChange() {
+                console.log("handleChange")
+            }
+        },
+        template: `<child @change="handleChange">parent</child>`
+    });
+    app.component("child", {
+        mounted() {
+            this.$emit('change')
+        },
+        template: `<div >child</div>`
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+而在context中可以直接emit('change')
+
+```
+<script>
+    const app = Vue.createApp({
+        methods: {
+            handleChange() {
+                console.log("handleChange")
+            }
+        },
+        template: `<child @change="handleChange">parent</child>`
+    });
+    app.component("child", {
+        template: `<div @click="handleClick">child</div>`,
+        setup(props, context) {
+            const {attrs,slots,emit} = context
+
+            function handleClick() {
+                emit('change')
+            }
+            return {handleClick}
+        }
+    })
+    const vm = app.mount("#root")
+</script>
+```
+
+### 6-4 使用Composition API开发TodoList
+
+```
+<script>
+    const app = Vue.createApp({
+        setup() {
+            const {
+                ref,
+                reactive
+            } = Vue;
+            const inputValue = ref("123")
+            const list = reactive([])
+            const handleInputValueChange = (e) => {
+                inputValue.value = e.target.value
+                console.log(e.target.value)
+            }
+            const handleSubmit = (e) => {
+                list.push(inputValue.value)
+            }
+            return {
+                list,
+                inputValue,
+                handleInputValueChange,
+                handleSubmit
+            }
+        },
+        template: `<div>
+            <input :value="inputValue" @input="handleInputValueChange"/>
+            <div>{{inputValue}}</div>
+            <button @click="handleSubmit">提交</button>
+            <ul>
+                <li v-for="(item,index) in list" :key="index">{{item}}</li>
+            </ul>
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+```
+
+还可以把list相关操作封装，input相关操作封装
+
+```
+
+```
 
 
 

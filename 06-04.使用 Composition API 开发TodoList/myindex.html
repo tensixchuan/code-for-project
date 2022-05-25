@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 37</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 将关于list的代码进行封装
+    const listRelativeEffect = () => {
+            const {
+                reactive
+            } = Vue;
+            const list = reactive([])
+            const handleSubmit = (item) => {
+                list.push(item)
+            }
+            return {
+                handleSubmit,
+                list
+            }
+        }
+        // 将关于inputValue的代码进行封装
+    const inputRelativeEffect = () => {
+        const {
+            ref
+        } = Vue;
+        const inputValue = ref("123")
+        const handleInputValueChange = (e) => {
+            inputValue.value = e.target.value
+            console.log(e.target.value)
+        }
+        return {
+            inputValue,
+            handleInputValueChange
+        }
+    }
+    const app = Vue.createApp({
+        // setup() {
+        //     const {
+        //         ref,
+        //         reactive
+        //     } = Vue;
+        //     const inputValue = ref("123")
+        //     const list = reactive([])
+        //     const handleInputValueChange = (e) => {
+        //         inputValue.value = e.target.value
+        //         console.log(e.target.value)
+        //     }
+        //     const handleSubmit = (e) => {
+        //         list.push(inputValue.value)
+        //     }
+        //     return {
+        //         list,
+        //         inputValue,
+        //         handleInputValueChange,
+        //         handleSubmit
+        //     }
+        // },
+        setup() {
+            const {
+                list,
+                handleSubmit
+            } = listRelativeEffect();
+            const {
+                inputValue,
+                handleInputValueChange
+            } = inputRelativeEffect();
+            return {
+                list,
+                inputValue,
+                handleInputValueChange,
+                handleSubmit
+            }
+        },
+        template: `<div>
+            <input :value="inputValue" @input="handleInputValueChange"/>
+            <div>{{inputValue}}</div>
+            <button @click="handleSubmit">提交</button>
+            <ul>
+                <li v-for="(item,index) in list" :key="index">{{item}}</li>
+            </ul>
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

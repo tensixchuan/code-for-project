@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 31</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // render 函数  
+    // template在底层编译后会生成render函数，render函数返回虚拟Dom（Dom节点的JS表示）
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                show: false
+            }
+        },
+        methods: {
+            handleClick() {
+                this.show = !this.show
+            }
+        },
+        template: `<my-title level="3"> hello wo </my-title>`
+    });
+
+    app.component('my-title', {
+        props: ["level"],
+        render() {
+            // h函数返回虚拟Dom节点
+            // 第一个参数为tagName
+            // 第二个参数为attributes, 表示标签上定义的属性
+            // 第三个参数为节点对应的文本内容
+
+            // template -> render -> h ->虚拟Dom ->真实Dom ->展示到页面
+            const {
+                h
+            } = Vue;
+            // return h("h" + this.level, {}, this.$slots.default())
+
+            // h的嵌套
+            return h("h" + this.level, {}, [this.$slots.default(), h('h4', {}, "dell")])
+        }
+    })
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

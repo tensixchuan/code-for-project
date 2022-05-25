@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 32</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // 用plugin 封装
+    const validatorPlugin = (app, options) => {
+        app.mixin({
+            created() {
+                for (let key in this.$options.rules) {
+                    const item = this.$options.rules[key]
+                    console.log(this)
+                    this.$watch(key, value => {
+                        console.log(value)
+                        const result = item.validate(value)
+                        if (!result) console.log(item.message)
+                    })
+                }
+            }
+        })
+    }
+    const app = Vue.createApp({
+        data() {
+            return {
+                name: "dell",
+                age: 21
+            }
+        },
+        rules: {
+            age: {
+                validate: age => {
+                    return age > 25
+                },
+                message: "too young"
+            },
+            name: {
+                validate: name => {
+                    return name.length <= 10
+                },
+                message: "too long"
+            }
+        },
+        template: `<div>{{name}}--{{age}}</div>`
+    });
+    app.use(validatorPlugin)
+
+    const vm = app.mount("#root")
+</script>
+
+</html>
