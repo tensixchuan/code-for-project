@@ -3283,11 +3283,15 @@ setup() {
 
 1. 安装node、npm
 
+   
+
 2. 安装nrm
 
    ```
    npm install nrm -g
    ```
+
+   注：提示没有权限安装失败的话就win+r，cmd 然后ctrl+shift+enter以管理者权限打开命令行再输入命令。
 
    nrm ls 列出可用镜像源 `nrm ls`
 
@@ -3333,7 +3337,7 @@ setup() {
 
    ctrl + c 退出关闭项目
 
-   可以在VScode 中打开，安装Vetur扩展（语法提示），
+   可以在VScode 中打开，安装Vetur扩展（语法提示），`npm install` 引入node_modules
 
 工程目录中源码放在src中，APP.vue相当于一个组件，模板写在template中，样式写在style中，核心逻辑在export default中，包含name、局部组件。像APP.vue这样的组件就是单文件组件，文件即代表组件。
 
