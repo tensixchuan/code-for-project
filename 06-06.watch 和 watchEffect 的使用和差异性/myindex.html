@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 39</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // watch 侦听器
+    // watchEffect 侦听器，偏向于 effect
+    const app = Vue.createApp({
+        setup() {
+            const {
+                reactive,
+                toRefs,
+                watch,
+                watchEffect
+            } = Vue
+            const person = reactive({
+                name: "w",
+                age: 23
+            });
+            // 具备一定的惰性 lazy
+            // 参数可以拿到当前值和原始值
+
+
+            // watch(() => person.name, (currentValue, prevValue) => {
+            //     console.log(currentValue, prevValue)
+            // })
+            // watch(() => person.age, (currentValue, prevValue) => {
+            //     console.log(currentValue, prevValue)
+            // })
+
+            // 可以侦听多个数据的变化，用一个侦听器承载
+            watch([person.name, person.age], ([currenName, currenAge], [prevName, prevAge]) => {
+                console.log([currenName, prevName], [currenAge, prevAge])
+            }, {
+                immediate: true
+            });
+            // watchEffect立即执行，没有惰性
+            // 不需要传递要侦听的内容，会自动感知代码依赖，不需要传递很多参数，只需要传递一个回调函数
+            // watchEffect 不能获取之前的值
+            const stop = watchEffect(() => {
+                console.log(person.name)
+                setTimeout(() => {
+                    stop()
+                }, 5000)
+            })
+
+            const {
+                name,
+                age
+            } = toRefs(person)
+            return {
+                name,
+                age
+            }
+        },
+        template: `<div>
+            Name: <input v-model="name"/>
+            Age: <input v-model="age"/>
+            <div>my mame is {{name}},age is {{age}}</div>
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

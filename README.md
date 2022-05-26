@@ -2583,6 +2583,8 @@ const validatorPlugin = (app, options) => {
 
 ## 第6章 Composition API
 
+用了composition 之后，就不需要写data methods 这些了，可以直接在setup函数中写，让数据响应式
+
 ### 6-1 setup函数的使用
 
 ```
@@ -2882,18 +2884,641 @@ context里存放着attrs, slots,emit
 还可以把list相关操作封装，input相关操作封装
 
 ```
+// 将关于list的代码进行封装
+    const listRelativeEffect = () => {
+            const {
+                reactive
+            } = Vue;
+            const list = reactive([])
+            const handleSubmit = (item) => {
+                list.push(item)
+            }
+            return {
+                handleSubmit,
+                list
+            }
+        }
+        // 将关于inputValue的代码进行封装
+    const inputRelativeEffect = () => {
+        const {
+            ref
+        } = Vue;
+        const inputValue = ref("123")
+        const handleInputValueChange = (e) => {
+            inputValue.value = e.target.value
+            console.log(e.target.value)
+        }
+        return {
+            inputValue,
+            handleInputValueChange
+        }
+    }
+    const app = Vue.createApp({
+        // 流程调度中转
+        setup() {
+            const {
+                list,
+                handleSubmit
+            } = listRelativeEffect();
+            const {
+                inputValue,
+                handleInputValueChange
+            } = inputRelativeEffect();
+            return {
+                list,
+                inputValue,
+                handleInputValueChange,
+                handleSubmit
+            }
+        },
+        template: `<div>
+            <input :value="inputValue" @input="handleInputValueChange"/>
+            <div>{{inputValue}}</div>
+            <button @click="handleSubmit(inputValue)">提交</button>
+            <ul>
+                <li v-for="(item,index) in list" :key="index">{{item}}</li>
+            </ul>
+        </div>`
+    });
+```
 
+### 6-5 computed方法生成计算属性
+
+```
+const app = Vue.createApp({
+
+        setup() {
+            const {
+                ref,
+                computed
+            } = Vue
+            const count = ref(0)
+            const handleClick = function() {
+                count.value++
+            }
+            const countAddFive = computed(() => {
+                return count.value + 5
+            })
+            return {
+                count,
+                handleClick,
+                countAddFive
+            }
+        },
+        template: `<div>
+            <span @click="handleClick">{{count}}</span>--{{countAddFive}}
+        </div>`
+    });
+```
+
+computed还可以设置set和get
+
+```
+const app = Vue.createApp({
+        setup() {
+            const {
+                ref,
+                computed
+            } = Vue
+            const count = ref(0)
+            const handleClick = function() {
+                    count.value++
+                }
+                // const countAddFive = computed(() => {
+                //     return count.value + 5
+                // })
+            const countAddFive = computed({
+                get: () => {
+                    return count.value + 5
+                },
+                set: (param) => {
+                    count.value = param - 5
+                }
+            })
+            setTimeout(() => {
+                countAddFive.value = 100
+            }, 2000)
+            return {
+                count,
+                handleClick,
+                countAddFive
+            }
+        },
+        template: `<div>
+            <span @click="handleClick">{{count}}</span>--{{countAddFive}}
+        </div>`
+    });
+```
+
+### 6-6 watch 和 watchEffect 的使用和差异性
+
+#### watch
+
+```
+// watch 侦听器
+    const app = Vue.createApp({
+        setup() {
+            const {
+                ref,
+                watch
+            } = Vue
+            const name = ref("wd");
+            // 具备一定的惰性 lazy
+            // 参数可以拿到当前值和原始值
+            watch(name, (currentValue, prevValue) => {
+                console.log(currentValue, prevValue)
+            })
+            return {
+                name
+            }
+        },
+        template: `<div>
+            Name: <input v-model="name"/>
+            <div>my mame is {{name}}</div>
+        </div>`
+    });
+```
+
+如果要监听reactive的部分属性，不能直接watch(Obj.xxx, (currentValue, prevValue)=>{})，因为监听对象只能是getter/effect function、ref、reactive object，或者an array of these types. 所以可以改写为watch(()=>Obj.xxx, (currentValue, prevValue)=>{})，如果要监听多个属性，可以写在数组里
+
+```
+// watch 侦听器
+    const app = Vue.createApp({
+        setup() {
+            const {
+                reactive,
+                ref,
+                toRefs,
+                watch
+            } = Vue
+            // const name = ref("wd");
+            const person = reactive({
+                    name: "w",
+                    age: 23
+                })
+                // 具备一定的惰性 lazy
+                // 参数可以拿到当前值和原始值
+
+            // watch(() => person.name, (currentValue, prevValue) => {
+            //     console.log(currentValue, prevValue)
+            // })
+            // watch(() => person.age, (currentValue, prevValue) => {
+            //     console.log(currentValue, prevValue)
+            // })
+            
+            // 可以侦听多个数据的变化，用一个侦听器承载
+            watch([person.name, person.age], ([currenName, currenAge], [prevName, prevAge]) => {
+                console.log([currenName, prevName], [currenAge, prevAge])
+            })
+            const {
+                name,
+                age
+            } = toRefs(person)
+            return {
+                name,
+                age
+            }
+        },
+        template: `<div>
+            Name: <input v-model="name"/>
+            Age: <input v-model="age"/>
+            <div>my mame is {{name}},age is {{age}}</div>
+        </div>`
+    });
+```
+
+watch是惰性的，不会立即执行，如果要改为立即执行的话可以再传一个参数：`{ immediate: true}`，改为`watch(()=>{},{ immediate: true})`
+
+#### watchEffect
+
+-  watchEffect立即执行，没有惰性
+- 不需要传递要侦听的内容，会自动感知代码依赖，不需要传递很多参数，只需要传递一个回调函数
+- watchEffect 不能获取之前的值
+
+```
+watchEffect(() => {
+	console.log(person.name)
+})
+```
+
+#### 取消侦听器
+
+```
+const stop1=watch([person.name, person.age], ([currenName, currenAge], [prevName, prevAge]) => {
+	console.log([currenName, prevName], [currenAge, prevAge])
+	setTimeout(() => {
+		stop1()
+	}, 5000)
+})
+
+const stop2 = watchEffect(() => {
+	console.log(person.name)
+	setTimeout(() => {
+		stop2()
+	}, 5000)
+})
+```
+
+### 6-7 生命周期函数的新写法
+
+```
+<script>
+    // compisition API 中的生命周期函数
+
+    // compisition中没有ceated 和beforeCreate, 因为setup出现在create之前
+    // beforeMount => onBeforeMount
+    // mounted => onMounted
+    // beforeUpdate => onBeforeUpdate
+    // updated => onUpdated
+    // beforeUnmount => onBeforeUnmount
+    // unmounted => onUnmounted
+    // 除了上述对应的生命周期函数，compisition API中还有额外的生命周期函数：
+    // onRenderTracked: 每次页面渲染时自动执行
+    // onRenderTriggered: 重新触发页面渲染时执行
+
+    const app = Vue.createApp({
+        mounted() {
+            console.log("mounted")
+        },
+        setup() {
+            const {
+                ref,
+                onBeforeMount,
+                onMounted,
+                onBeforeUpdate,
+                onUpdated,
+
+            } = Vue;
+            const name = ref("wd");
+            const handleClick = function() {
+                name.value = "wang"
+            };
+            onBeforeMount(() => {
+                console.log("onBeforeMount")
+            });
+            onBeforeUpdate(() => {
+                console.log("onBeforeUpdate")
+            });
+            onUpdated(() => {
+                console.log("onUpdated")
+            });
+            // 每次渲染后重新收集响应式依赖
+            onRenderTracked(() => {
+                console.log("onRenderTracked")
+            });
+            // 每次触发页面重新渲染时自动执行
+            onRenderTriggered(() => {
+                console.log("onRenderTriggered")
+            });
+            return {
+                name,
+                handleClick
+            };
+        },
+        template: `<div @click="handleClick">
+            {{name}}
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+```
+
+### 6-8 Provide，Inject，模板Ref的用法
+
+#### Provide，Inject
+
+```
+    const app = Vue.createApp({
+        setup() {
+            const {
+                ref,
+                provide
+            } = Vue
+            const name = ref('wd');
+            provide('name', name);
+            provide('changeName', (value) => {
+                name.value = value
+                console.log(value)
+            });
+        },
+        template: `<div>
+            <child/>
+        </div>`
+    });
+    app.component("child", {
+        setup(props, context) {
+            const {
+                inject
+            } = Vue
+            const name = inject('name', "default")
+            const changeName = inject('changeName')
+            const handleClick = function() {
+                changeName('wang')
+            }
+            return {
+                name,
+                handleClick
+            }
+        },
+        template: `<div @click="handleClick">{{name}}</div>`
+    })
+```
+
+如果要强制子组件不修改值，可以在传递name时用readonly封装
+
+```
+setup() {
+            const {
+                ref,
+                provide,
+                readonly
+            } = Vue
+            const name = ref('wd');
+            provide('name', readonly(name));
+            provide('changeName', (value) => {
+                name.value = value
+                console.log(value)
+            });
+        }
+```
+
+#### Dom Ref
+
+用ref 获取DOM元素节点: 
+
+```
+<script>
+    // CompositionAPI的语法下，用ref 获取真实的DOM元素节点
+    const app = Vue.createApp({
+        setup() {
+
+            const {
+                ref,
+                onMounted
+            } = Vue
+            const hello = ref(null);
+            onMounted(() => {
+                console.log(hello.value)
+            })
+            return {
+                hello
+            }
+        },
+        // 这里的ref是获取dom节点的ref
+        template: `<div ref="hello">
+            hello world
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
 ```
 
 
 
 ## 第7章 Vue 项目开发配套工具讲解
 
+### 7-1 VueCLI的使用和单文件组件
+
+1. 安装node、npm
+
+2. 安装nrm
+
+   ```
+   npm install nrm -g
+   ```
+
+   nrm ls 列出可用镜像源 `nrm ls`
+
+   ```
+   C:\Users\wind>nrm ls
+   
+     npm ---------- https://registry.npmjs.org/
+     yarn --------- https://registry.yarnpkg.com/
+     tencent ------ https://mirrors.cloud.tencent.com/npm/
+     cnpm --------- https://r.cnpmjs.org/
+     taobao ------- https://registry.npmmirror.com/
+     npmMirror ---- https://skimdb.npmjs.com/registry/
+   ```
+
+   使用淘宝镜像源 `nrm use taobao`
+
+3. 安装vue-cli
+
+   vue-cli是一个快速搭建vue工程的工具，为了安装新版本脚手架，所以先卸载一下
+
+   ```
+   npm uninstall vue-cli -g
+   yarn global remove vue-cli
+   
+   npm install -g @vue/cli
+   ```
+
+4. 创建Vue 项目
+
+   ```
+   cd Desktop
+   vue create mydemo
+   ```
+
+   然后会展现创建选项，选择人工配置（manually select features），选择Babel、Linter后回车，再选择vue版本（3.x），然后选择ESLint with error prevention only，选择Lint on save，保存时校验，选择配置文件的保存方式：In dedicated config files
+
+5. 运行项目
+
+   ```
+   cd mydemo
+   npm run serve
+   ```
+
+   ctrl + c 退出关闭项目
+
+   可以在VScode 中打开，安装Vetur扩展（语法提示），
+
+工程目录中源码放在src中，APP.vue相当于一个组件，模板写在template中，样式写在style中，核心逻辑在export default中，包含name、局部组件。像APP.vue这样的组件就是单文件组件，文件即代表组件。
+
+main.js为入口文件，用import 的语法引入npm管理的包
+
+```
+import { createApp } from 'vue'
+import App from './App.vue'
+```
+
+npm install
+
+### 7-2 使用单文件编写TodoList
+
+App.vue
+
+```
+<template>
+  <div>
+    <input v-model="inputValue"/>
+    <button class="button" @click="handleSubmit">提交</button>
+    <ul>
+      <list-item 
+        v-for="(item,index) in list" 
+        :key="index" 
+        :msg="item"/>
+    </ul>
+  </div>
+</template>
+
+<script>
+import { reactive,ref } from 'vue'
+import ListItem from './components/ListItem'
+export default {
+  name: 'App',
+  components:{ListItem},
+  setup(){
+    const list = reactive([])
+    const inputValue = ref("")
+    const handleSubmit = function(){
+      list.push(inputValue.value);
+      inputValue.value="";
+    }
+    return {list,inputValue,handleSubmit}
+  }
+}
+</script>
+
+<style>
+/* #app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+} */
+.button{
+  margin: 20px;
+}
+</style>
+```
+
+ListItem.vue
+
+```
+<template>
+    <li>{{msg}}</li>
+</template>
+
+<script>
+export default {
+    name:"ListItem",
+    props:{
+        msg:String
+    }
+}
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+### 7-3 Vue-Router的理解和使用
+
+路由是指根据url的不同，展示不同的内容
+
+```
+cd Desktop
+vue create mydemo
+```
+
+手工选择，选择router，不使用history mode（使用hash mode），ESLint 放在单目录，不保存
+
+```
+cd mydemo
+npm run serve
+```
+
+```
+//main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+
+// 路由是指根据url的不同，展示不同的内容
+createApp(App).use(router).mount('#app')
+```
+
+首先main.js中使用路由 `createApp(App).use(router).mount('#app')`，使用了router下的index.js定义的路由
+
+```
+//index.js
+import { createRouter, createWebHashHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: HomeView
+  },
+  {
+    path: '/about',
+    name: 'about',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+  }
+]
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+
+export default router
+```
+
+可以看到/和home组件做关联，/about和about组件做关联。
+
+main.js虽然使用了路由，但是最开始执行的实例还是App这个组件，打开App.vue：
+
+```
+<template>
+  <nav>
+    <router-link to="/">Home</router-link> |
+    <router-link to="/about">About</router-link>
+  </nav>
+  <router-view/>
+</template>
+
+<style>
+/* ...... */
+</style>
+```
+
+router-link 是跳转路由的标签，router-view是展示的路由内容，展示当前路由对应的组件内容
+
+总结：
+
+- main.js 入口
+- ​	App.vue 路由的展示和跳转
+- ​		在router/index.js下对应路径和组件的关系
+- ​			views下放要展示的路由组件
+
+注：
+
+### 7-4 VueX的语法详解
+
+
+
+### 7-5 Composition API 中如何使用VueX
+
+
+
+### 7-6 使用 axios 发生 ajax 请求
+
 
 
 ## 第8章 “京东到家”项目首页开发
 
-
+8-1 工程初始化
 
 ## 第9章 登陆功能开发
 

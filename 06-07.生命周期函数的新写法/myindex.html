@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lesson 39</title>
+    <script src="https://unpkg.com/vue@next"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    // compisition API 中的生命周期函数
+
+    // compisition中没有ceated 和beforeCreate, 因为实例没有完全被初始化
+    // beforeMount => onBeforeMount
+    // mounted => onMounted
+    // beforeUpdate => onBeforeUpdate
+    // updated => onUpdated
+    // beforeUnmount => onBeforeUnmount
+    // unmounted => onUnmounted
+    // 除了上述对应的生命周期函数，compisition API中还有额外的生命周期函数：
+    // onRenderTracked: 每次页面渲染时自动执行
+    // onRenderTriggered: 重新触发页面渲染时执行
+
+    const app = Vue.createApp({
+        mounted() {
+            console.log("mounted")
+        },
+        setup() {
+            const {
+                ref,
+                onBeforeMount,
+                onMounted,
+                onBeforeUpdate,
+                onUpdated,
+
+            } = Vue;
+            const name = ref("wd");
+            const handleClick = function() {
+                name.value = "wang"
+            };
+            onBeforeMount(() => {
+                console.log("onBeforeMount")
+            });
+            onBeforeUpdate(() => {
+                console.log("onBeforeUpdate")
+            });
+            onUpdated(() => {
+                console.log("onUpdated")
+            });
+            // 每次渲染后重新收集响应式依赖
+            onRenderTracked(() => {
+                console.log("onRenderTracked")
+            });
+            // 每次触发页面重新渲染时自动执行
+            onRenderTriggered(() => {
+                console.log("onRenderTriggered")
+            });
+            return {
+                name,
+                handleClick
+            };
+        },
+        template: `<div @click="handleClick">
+            {{name}}
+        </div>`
+    });
+
+    const vm = app.mount("#root")
+</script>
+
+</html>

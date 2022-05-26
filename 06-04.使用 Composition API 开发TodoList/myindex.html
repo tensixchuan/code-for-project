@@ -65,6 +65,7 @@
         //     }
         // },
         setup() {
+            // 流程调度中转
             const {
                 list,
                 handleSubmit
@@ -83,7 +84,7 @@
         template: `<div>
             <input :value="inputValue" @input="handleInputValueChange"/>
             <div>{{inputValue}}</div>
-            <button @click="handleSubmit">提交</button>
+            <button @click="handleSubmit(inputValue)">提交</button>
             <ul>
                 <li v-for="(item,index) in list" :key="index">{{item}}</li>
             </ul>
