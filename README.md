@@ -3750,15 +3750,61 @@ export default createStore({
 })
 ```
 
-
-
 ### 7-6 使用 axios 发生 ajax 请求
+
+1. 安装 axios 
+
+   `npm install axios --save`
+
+2. 引入axios
+
+   ```
+   <!-- AboutView.vue -->
+   <template>
+     <div class="about">
+       <h1 @click="handleClick">This is an about page</h1>
+       <h1>{{name}}</h1>
+     </div>
+   </template>
+   <script>
+   // https://www.fastmock.site/mock/ae8e9031947a302fed5f92425995aa19/jd/api/user/register
+   import {useStore} from 'vuex'
+   import {toRefs} from 'vue'
+   import axios from 'axios'
+   export default {
+     name: 'AboutPage',
+     setup(){
+       axios.get('https://www.fastmock.site/mock/ae8e9031947a302fed5f92425995aa19/jd/api/user/register')
+         .then((response)=>{
+           console.log(response)
+         })
+       const store = useStore();
+       const {name} = toRefs(store.state)
+       
+       return {
+         name
+       }
+     }
+   }
+   </script>
+   
+   ```
+
+   ![image-20220528123127511](C:\Users\wind\AppData\Roaming\Typora\typora-user-images\image-20220528123127511.png)
 
 
 
 ## 第8章 “京东到家”项目首页开发
 
-8-1 工程初始化
+### 8-1 工程初始化
+
+```
+vue create shop
+```
+
+人工选择Babel、Router、Vuex、CSS Pre-processors、Linter/Formatter，选择N使用哈希路由，选择Sass/SCSS(with dark sass)安装预处理器，选择标准ESLint ,Lint on save,配置文件放在单独的文件里，不保存成未来项目
+
+
 
 ## 第9章 登陆功能开发
 
