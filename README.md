@@ -3506,7 +3506,7 @@ router-link 是跳转路由的标签，router-view是展示的路由内容，展
 - ​		在router/index.js下对应路径和组件的关系
 - ​			views下放要展示的路由组件
 
-注：
+注：可以异步加载路由
 
 ### 7-4 VueX的语法详解
 
