@@ -3827,9 +3827,137 @@ vue create shop
   - store 目录下存放vuex的数据
   - views 目录下存放页面级别的组件
 
+### 8-3 基础样式集成及开发模拟器的使用
+
+1. 安装 normalize.css，统一设备样式差距
+
+```
+npm install normalize.css --save
+```
+
+2. main.js 引入
+
+```
+import 'normalize.css'
+```
+
+3. 新建style目录，新建base.scss文件
+
+```
+html {
+  font-size: 100px;
+}
+
+// 1rem = 1 * html font-size
+body {
+  font-size: .12rem;
+}
+```
 
 
 
+### 8-4 flex + iconfont 完成首页样式编写
+
+复制粘贴iconfont css样式至style目录下iconfont.css
+
+```
+/* Logo 字体 */
+@font-face {
+  font-family: "iconfont";
+  /* Project id 3435551 */
+  src: url('//at.alicdn.com/t/font_3435551_4x5updpdnh.woff2?t=1653743635919') format('woff2'),
+    url('//at.alicdn.com/t/font_3435551_4x5updpdnh.woff?t=1653743635919') format('woff'),
+    url('//at.alicdn.com/t/font_3435551_4x5updpdnh.ttf?t=1653743635919') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-gouwuche:before {
+  content: "\e63f";
+}
+
+.icon-shouye:before {
+  content: "\e64f";
+}
+
+.icon-wode:before {
+  content: "\e8a0";
+}
+
+.icon-dingdan:before {
+  content: "\e645";
+}
+```
+
+首页使用相应icon代码
+
+```
+<template>
+  <div class="docker">
+    <!-- BEM
+    Block__Element--Modifier -->
+    <span class="docker__item docker__item--active">
+      <div class="iconfont">&#xe64f;</div>
+      <div class="docker__title">首页</div>
+    </span>
+    <span class="docker__item">
+      <div class="iconfont">&#xe63f;</div>
+      <div class="docker__title">购物车</div>
+    </span>
+    <span class="docker__item">
+      <div class="iconfont">&#xe645;</div>
+      <div class="docker__title">订单</div>
+    </span>
+    <span class="docker__item">
+      <div class="iconfont"> &#xe8a0;</div>
+      <div class="docker__title">我的</div>
+    </span>
+  </div>
+</template>
+```
+
+编写样式
+
+```
+<style lang="scss">
+.docker {
+  padding: 0 0.18rem;
+  display: flex;
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 49px;
+  width: 100%;
+  border-top: 1px solid #f1f1f1;
+  &__item {
+    flex: 1;
+    text-align: center;
+    .iconfont {
+      margin: 0.07rem 0 0.02rem;
+      font-size: 0.18rem;
+    }
+    &--active {
+      color: #1fa4fc;
+    }
+  }
+  &__title {
+    font-size: 20px;
+    transform: scale(0.5, 0.5);
+    transform-origin: center top;
+  }
+}
+</style>
+```
+
+- BEM 命名法：Block__Element--Modifier，表示Element为Block的子元素，当前状态为Modifier
+- box-sizing: border-box 将border和padding数值包含在width和height之内，这样修改border和padding数值，盒子的大小不变。
 
 ## 第9章 登陆功能开发
 
