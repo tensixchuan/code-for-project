@@ -3802,7 +3802,32 @@ export default createStore({
 vue create shop
 ```
 
-人工选择Babel、Router、Vuex、CSS Pre-processors、Linter/Formatter，选择N使用哈希路由，选择Sass/SCSS(with dark sass)安装预处理器，选择标准ESLint ,Lint on save,配置文件放在单独的文件里，不保存成未来项目
+人工选择Babel、Router、Vuex、CSS Pre-processors、Linter/Formatter，选择N使用哈希路由，选择Sass/SCSS(with dark sass)安装预处理器，选择标准ESLint ,Lint on save,配置文件放在单独的文件里，不保存成未来项目。
+
+### 8-2 工程目录代码简介及整理
+
+安装ESLint、Vetur扩展插件
+
+工程目录：
+
+- node_modules 放工程需要的依赖包，误删了可以通过 `npm install` 重新安装package.json中需要的依赖
+
+- public下存放整个项目默认的index.html模板、和页面tab栏的小图标，通过  `<link rel="icon" href="<%= BASE_URL %>favicon.ico"> `使用
+- editorconfig配置编辑器的默认配置
+- babel.config.js配置vue中用到的babel配置
+- package.json 放项目的依赖包、ESLint的项目配置项等
+- package-lock.json 锁版本文件，保证多人协作或反复安装依赖时安装的版本号固定
+- README.md 项目描述文件
+- src 源码文件
+  - main.js 源代码入口文件，导入App.vue单文件组件
+  - App.vue 最外层的组件
+  - assets 目录下放静态文件
+  - components 目录下放功能组件
+  - router 目录下index.js放对应路由配置
+  - store 目录下存放vuex的数据
+  - views 目录下存放页面级别的组件
+
+
 
 
 
