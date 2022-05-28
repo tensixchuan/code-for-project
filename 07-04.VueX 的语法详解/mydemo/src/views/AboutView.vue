@@ -7,9 +7,10 @@
   </div>
 </template>
 <script>
-
+// https://www.fastmock.site/mock/ae8e9031947a302fed5f92425995aa19/jd/api/user/register
 import {useStore} from 'vuex'
 import {toRefs} from 'vue'
+import axios from 'axios'
 export default {
   name: 'AboutPage',
   // computed:{
@@ -24,6 +25,11 @@ export default {
   //   }
   // }
   setup(){
+    axios.get('https://www.fastmock.site/mock/ae8e9031947a302fed5f92425995aa19/jd/api/user/register')
+      .then((response)=>{
+        const data = response.data.desc;
+        console.log(data)
+      })
     const store = useStore();
     const {name} = toRefs(store.state)
     const handleClick = function(){
