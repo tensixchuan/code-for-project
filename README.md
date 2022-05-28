@@ -3510,7 +3510,185 @@ router-link 是跳转路由的标签，router-view是展示的路由内容，展
 
 ### 7-4 VueX的语法详解
 
+main.js
 
+```
+//main.js
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import store from './store'
+
+createApp(App).use(store).use(router).mount('#app')
+```
+
+vuex提供了全局的仓库store
+
+```
+// store/index.js
+import { createStore } from 'vuex'
+
+export default createStore({
+  state: {
+  },
+  getters: {
+  },
+  mutations: {
+  },
+  actions: {
+  },
+  modules: {
+  }
+})
+
+```
+
+存数据：
+
+```
+state: {
+	name:"wd"
+},
+```
+
+取数据：`this.$store.state.name`
+
+改数据：
+
+```
+<!-- AboutView.vue
+第一步：派发一个action -->
+<template>
+  <div class="about">
+    <h1 @click="handleClick">This is an about page</h1>
+    <h1>{{myname}}</h1>
+  </div>
+</template>
+<script>
+
+export default {
+  name: 'AboutPage',
+  computed:{
+    myname(){
+      return this.$store.state.name
+    }
+  },
+  methods:{
+    handleClick(){
+      // 想改变数据的话，vuex要求第一步先派发一个action
+      this.$store.dispatch('changeName')
+    }
+  }
+}
+</script>
+```
+
+```
+// index.js
+import { createStore } from 'vuex'
+// vuex 数据管理框
+// vuex 创建了一个全局唯一的仓库，用来存放全局的数据
+export default createStore({
+    state: {
+        name: 'wd'
+    },
+    getters: {},
+    mutations: {
+        // 第四步，对应的 mutation 被执行
+        changeName() {
+            // 第五步，在mutation中修改数据
+            this.state.name = "wang"
+        }
+    },
+    actions: {
+        // 第二步，store 感知到触发了changeName 的action，执行操作
+        changeName() {
+            // 第三步，提交一个commit 触发一个mutation
+            console.log("try to change name");
+            this.commit('changeName')
+        }
+    },
+    modules: {}
+})
+```
+
+步骤：
+
+1. dispatch方法，dispatch派发一个action，名为change
+2. 感知到 change 这个 action， 执行store中action下的change方法
+3. commit一个名为change的数据改变
+4. mutation 感知到提交的change改变，执行change方法改变数据
+
+如果没有异步操作，可以不发送action在action中改数据，可以直接commit提交数据修改请求，mutation也能感知到。
+
+注：虽然mutations里面可以异步修改数据，但是默认只进行同步操作，不允许写异步代码。如果要异步的话应该在action中进行异步commit
+
+传参数：
+
+```
+<!-- AboutView.vue
+第一步：派发一个action -->
+<template>
+  <div class="about">
+    <h1 @click="handleClick">This is an about page</h1>
+    <h1>{{myname}}</h1>
+  </div>
+</template>
+<script>
+
+export default {
+  name: 'AboutPage',
+  computed:{
+    myname(){
+      return this.$store.state.name
+    }
+  },
+  methods:{
+    handleClick(){
+      // 想改变数据的话，vuex要求第一步先派发一个action
+      this.$store.dispatch('changeName','wang')
+    }
+  }
+}
+</script>
+
+```
+
+```
+// index.js
+import { createStore } from 'vuex'
+// vuex 数据管理框
+// vuex 创建了一个全局唯一的仓库，用来存放全局的数据
+export default createStore({
+    state: {
+        name: 'wd'
+    },
+    getters: {},
+    mutations: {
+        // 第四步，对应的 mutation 被执行
+        changeName(state, str) {
+            // 第五步，在mutation中修改数据
+            // this.state.name = "wang"
+            state.name = str
+        }
+    },
+    actions: {
+        // 第二步，store 感知到触发了changeName 的action，执行操作
+        changeName(store, str) {
+            // 第三步，提交一个commit 触发一个mutation
+            console.log("try to change name");
+            // this.commit('changeName')
+            setTimeout(() => {
+                store.commit('changeName', str)
+            }, 2000)
+        }
+    },
+    modules: {}
+})
+```
+
+- dispatch 和 action 做关联
+- commit 和 mutation 做关联
 
 ### 7-5 Composition API 中如何使用VueX
 
