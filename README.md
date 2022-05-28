@@ -3631,7 +3631,7 @@ export default createStore({
 <template>
   <div class="about">
     <h1 @click="handleClick">This is an about page</h1>
-    <h1>{{myname}}</h1>
+    <h1>{{name}}</h1>
   </div>
 </template>
 <script>
@@ -3639,7 +3639,7 @@ export default createStore({
 export default {
   name: 'AboutPage',
   computed:{
-    myname(){
+    name(){
       return this.$store.state.name
     }
   },
@@ -3691,6 +3691,64 @@ export default createStore({
 - commit 和 mutation 做关联
 
 ### 7-5 Composition API 中如何使用VueX
+
+```
+<!-- AboutView.vue -->
+<template>
+  <div class="about">
+    <h1 @click="handleClick">This is an about page</h1>
+    <h1>{{name}}</h1>
+  </div>
+</template>
+<script>
+
+import {useStore} from 'vuex'
+import {toRefs} from 'vue'
+export default {
+  name: 'AboutPage',
+  setup(){
+    const store = useStore();
+    const {name} = toRefs(store.state)
+    const handleClick = function(){
+      // store.dispatch('changeName','wang') // 异步修改数据要dispatch到action中
+      store.commit('changeName','wang') // 同步直接commit
+    }
+    return {
+      name,handleClick
+    }
+  }
+}
+</script>
+
+```
+
+```
+// index.js
+import { createStore } from 'vuex'
+export default createStore({
+    state: {
+        name: 'wd'
+    },
+    getters: {},
+
+    // 使用Composition API
+    mutations: {
+        changeName(state, str) {
+            state.name = str
+        }
+    },
+    actions: {
+        changeName(store, str) {
+            console.log("try to change name");
+            // this.commit('changeName') // 同步
+            setTimeout(() => {
+                store.commit('changeName', str) // 异步
+            }, 2000)
+        }
+    },
+    modules: {}
+})
+```
 
 
 
