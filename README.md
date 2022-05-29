@@ -3858,7 +3858,7 @@ body {
 
 ### 8-4 flex + iconfont 完成首页样式编写
 
-复制粘贴iconfont css样式至style目录下iconfont.css
+#### 复制粘贴iconfont css样式至style目录下iconfont.css
 
 ```
 /* Logo 字体 */
@@ -3895,7 +3895,24 @@ body {
 }
 ```
 
-首页使用相应icon代码
+#### main.js引入文件
+
+```
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import store from './store'
+import 'normalize.css'
+import './style/base.scss'
+import './style/iconfont.css'
+
+createApp(App).use(store).use(router).mount('#app')
+
+```
+
+注：可以在style中新建index.scss，然后引入样式的代码写在index.scss中，这样main.js只需要引入index.scss
+
+#### 首页使用相应icon代码
 
 ```
 <template>
@@ -3922,7 +3939,7 @@ body {
 </template>
 ```
 
-编写样式
+#### 编写底部样式
 
 ```
 <style lang="scss">
@@ -3958,6 +3975,8 @@ body {
 
 - BEM 命名法：Block__Element--Modifier，表示Element为Block的子元素，当前状态为Modifier
 - box-sizing: border-box 将border和padding数值包含在width和height之内，这样修改border和padding数值，盒子的大小不变。
+
+
 
 ## 第9章 登陆功能开发
 
