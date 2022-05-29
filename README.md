@@ -3976,7 +3976,7 @@ createApp(App).use(store).use(router).mount('#app')
 - BEM 命名法：Block__Element--Modifier，表示Element为Block的子元素，当前状态为Modifier
 - box-sizing: border-box 将border和padding数值包含在width和height之内，这样修改border和padding数值，盒子的大小不变。
 
-
+### 8-5 使用 SCSS 组织地址区域布局
 
 ## 第9章 登陆功能开发
 
