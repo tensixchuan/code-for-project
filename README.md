@@ -3978,6 +3978,8 @@ createApp(App).use(store).use(router).mount('#app')
 
 ### 8-5 使用 SCSS 组织地址区域布局
 
+scroped
+
 ## 第9章 登陆功能开发
 
 
