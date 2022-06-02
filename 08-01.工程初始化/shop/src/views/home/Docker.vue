@@ -24,7 +24,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scroped>
+<style lang="scss" >
 @import "../../style/viriables.scss";
 .docker {
   padding: 0 0.18rem;

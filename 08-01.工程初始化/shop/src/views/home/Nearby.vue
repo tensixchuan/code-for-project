@@ -21,21 +21,21 @@ export default {
   setup () {
     const nearbyList = [{
       src: 'http://www.dell-lee.com/imgs/vue3/near.png',
-      title: '超市',
-      tags: ['月售一万+', '起送￥0', '基础运费￥5'],
-      desc: '6元无门槛红包'
-    },
-    {
-      src: 'http://www.dell-lee.com/imgs/vue3/near.png',
       title: '沃尔玛',
       tags: ['月售一万+', '起送￥0', '基础运费￥5'],
       desc: '6元无门槛红包'
     },
     {
       src: 'http://www.dell-lee.com/imgs/vue3/near.png',
-      title: '沃尔玛',
+      title: '永辉超市',
+      tags: ['月售三万+', '起送￥0', '基础运费￥0'],
+      desc: '8元无门槛红包'
+    },
+    {
+      src: 'http://www.dell-lee.com/imgs/vue3/near.png',
+      title: '河马生鲜',
       tags: ['月售一万+', '起送￥0', '基础运费￥5'],
-      desc: '6元无门槛红包'
+      desc: '8元无门槛红包'
     }]
     return { nearbyList }
   }
