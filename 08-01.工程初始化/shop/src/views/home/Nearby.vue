@@ -33,7 +33,7 @@ export default {
     },
     {
       src: 'http://www.dell-lee.com/imgs/vue3/near.png',
-      title: '河马生鲜',
+      title: '盒马生鲜',
       tags: ['月售一万+', '起送￥0', '基础运费￥5'],
       desc: '8元无门槛红包'
     }]

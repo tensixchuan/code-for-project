@@ -24,7 +24,7 @@ export default {
 }
 </script>
 
-<style lang="scss" >
+<style lang="scss" scroped>
 @import "../../style/viriables.scss";
 .docker {
   padding: 0 0.18rem;
@@ -32,8 +32,9 @@ export default {
   box-sizing: border-box;
   position: absolute;
   left: 0;
+  right: 0;
   bottom: 0;
-  height: 49px;
+  height: 0.5rem;
   width: 100%;
   color: $content-fontcolor;
   border-top: 1px solid $content-bgColor;
@@ -49,7 +50,7 @@ export default {
     }
   }
   &__title {
-    font-size: 20px;
+    font-size: 0.2rem;
     transform: scale(0.5, 0.5);
     transform-origin: center top;
   }

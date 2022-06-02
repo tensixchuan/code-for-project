@@ -63,7 +63,7 @@ export default {
   color: $content-fontcolor;
   .position__icon {
     position: relative;
-    top: 2px;
+    top: 0.02rem;
     margin-right: 0.06rem;
     font-size: 0.2rem;
   }

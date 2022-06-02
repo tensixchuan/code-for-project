@@ -3982,6 +3982,249 @@ scroped
 
 ## 第9章 登陆功能开发
 
+### 9-4 使用axios发送登录注册mock请求
+
+1. 安装axios
+
+```
+npm install axios --save
+```
+
+2. 修改Content-Type
+
+```
+import axios from 'axios'
+axios.defaults.headers.post['Content-Type'] = 'application/json'
+```
+
+3. 发送请求
+
+```
+import axios from 'axios'
+axios.defaults.headers.post['Content-Type'] = 'application/json'
+export default {
+  name: 'login-page',
+  setup () {
+    const data = reactive({
+      usernumber: '',
+      password: ''
+    })
+    const router = useRouter()
+    const handleLogin = () => {
+      axios.post('https://www.fastmock.site/mock/399fa18dcb16395f9f4bd9ba42f75cb1/shop/api/user/login', {
+        usernumber: data.usernumber,
+        password: data.password
+      }).then(response => {
+        alert('成功')
+        localStorage.isLogin = true
+        router.push({ name: 'home' })
+      }).catch(() => {
+        alert('登录失败')
+      })
+    }
+    return { handleLogin, data }
+  }
+}
+</script>
+```
+
+- 优化1：使用async和await
+
+```
+const handleLogin = async () => {
+      try {
+        const result = await axios.post('https://www.fastmock1.site/mock/399fa18dcb16395f9f4bd9ba42f75cb1/shop/api/user/login', {
+          usernumber: data.usernumber,
+          password: data.password
+        })
+        console.log(result)
+        if (result?.data?.errno === 0) {
+          localStorage.isLogin = true
+          router.push({ name: 'home' })
+        } else {
+          alert('登录失败')
+        }
+      } catch {
+        alert('请求失败')
+      }
+    }
+```
+
+- 优化2：封装为函数
+
+```
+import axios from 'axios'
+import { reject, resolve } from 'core-js/fn/promise'
+
+export const post = (url, data = {}) => {
+  return new Promise(() => {
+    axios.post(url, data, {
+      baseURL: 'https://www.fastmock1.site/mock/399fa18dcb16395f9f4bd9ba42f75cb1/shop',
+      headers: {
+        'Conntent-Type': 'application/json'
+      }
+    }).then(response => {
+      resolve(response.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}
+
+```
+
+```
+const handleLogin = async () => {
+      try {
+        const result = await post('/api/user/login', {
+          usernumber: data.usernumber,
+          password: data.password
+        })
+        console.log(result)
+        if (result?.errno === 0) {
+          localStorage.isLogin = true
+          router.push({ name: 'home' })
+        } else {
+          alert('登录失败')
+        }
+      } catch {
+        alert('请求失败')
+      }
+    }
+```
+
+### 9-6 弹窗组件的开发
+
+子组件
+
+```
+<template>
+  <div class="toast">提示信息</div>
+</template>
+
+<script>
+export default {
+  name: 'toast-part'
+}
+</script>
+
+<style>
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 0.05rem;
+  color: #fff;
+}
+</style>
+
+```
+
+父组件
+
+```
+<template>
+  ......
+  <Toast v-if="data.showToast" />
+</template>
+```
+
+```
+import Toast from '../../components/Toast'
+export default {
+  name: 'login-page',
+  components: { Toast },
+  setup () {
+    const data = reactive({
+      ......
+      showToast: false
+    })
+    const router = useRouter()
+    const handleLogin = async () => {
+      try {
+        const result = await post('111/api/user/login', {
+          usernumber: data.usernumber,
+          password: data.password
+        })
+        console.log(result)
+        if (result?.errno === 0) {
+          localStorage.isLogin = true
+          localStorage.usernumber = data.usernumber
+          router.push({ name: 'home' })
+        } else {
+          data.showToast = true
+          // alert('登录失败')
+        }
+      } catch (e) {
+        data.showToast = true
+        // alert('请求失败')
+      }
+    }
+    const handleRegister = () => {
+      router.push({ name: 'register' })
+    }
+    return { handleLogin, handleRegister, data }
+  }
+}
+```
+
+父子组件传值：
+
+- 父：
+
+```
+<template>
+  ......
+  <Toast v-if="data.showToast"  :message="data.toastMessage"/>
+</template>
+```
+
+```
+const showToast = (messgae) => {
+      data.toastMessage = messgae
+      data.showToast = true
+      setTimeout(() => {
+        data.showToast = false
+      }, 2000)
+    }
+    const handleLogin = async () => {
+      try {
+        const result = await post('111/api/user/login', {
+          usernumber: data.usernumber,
+          password: data.password
+        })
+        console.log(result)
+        if (result?.errno === 0) {
+          localStorage.isLogin = true
+          localStorage.usernumber = data.usernumber
+          router.push({ name: 'home' })
+        } else {
+          showToast('登录失败')
+        }
+      } catch (e) {
+        showToast('请求失败')
+      }
+    }
+```
+
+- 子：
+
+```
+<template>
+  <div class="toast">{{message}}</div>
+</template>
+
+<script>
+export default {
+  name: 'toast-part',
+  props: ['message']
+}
+</script>
+```
+
 
 
 ## 第10章 商家展示功能开发（上）
