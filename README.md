@@ -4225,6 +4225,60 @@ export default {
 </script>
 ```
 
+9-7 代码拆分
+
+```
+<Toast v-if="toastData.showToast" :message="toastData.toastMessage" />
+```
+
+```
+const useToastEffect = () => {
+  const toastData = reactive({
+    showToast: false,
+    toastMessage: ''
+  })
+  const showToast = (messgae) => {
+    toastData.toastMessage = messgae
+    toastData.showToast = true
+    setTimeout(() => {
+      toastData.showToast = false
+    }, 2000)
+  }
+  return { toastData, showToast }
+}
+export default {
+  name: 'login-page',
+  components: { Toast },
+  setup () {
+    const router = useRouter()
+    const data = reactive({ usernumber: '', password: '' })
+    const { toastData, showToast } = useToastEffect()
+    const handleLogin = async () => {
+      try {
+        const result = await post('111/api/user/login', {
+          usernumber: data.usernumber,
+          password: data.password
+        })
+        console.log(result)
+        if (result?.errno === 0) {
+          localStorage.isLogin = true
+          localStorage.usernumber = data.usernumber
+          router.push({ name: 'home' })
+        } else {
+          showToast('登录失败')
+        }
+      } catch (e) {
+        showToast('请求失败')
+      }
+    }
+    const handleRegister = () => {
+      router.push({ name: 'register' })
+    }
+    return { handleLogin, handleRegister, data, toastData }
+  }
+}
+```
+
 
 
 ## 第10章 商家展示功能开发（上）
