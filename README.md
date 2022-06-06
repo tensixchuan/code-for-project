@@ -4287,6 +4287,404 @@ export default {
 
 ## 第10章 商家展示功能开发（上）
 
+### 10-1 动态获取店铺列表
+
+#### https://www.fastmock.site/ 新建接口，返回数据如下：
+
+```
+{
+  errno:0,
+  data:[{
+    _id:'1',
+    imgUrl: 'http://www.dell-lee.com/imgs/vue3/near.png',
+    name: '沃尔玛',
+    sales:10000,
+    expressLimit:0,
+    expressPrice:5,
+    tags: ['月售一万+', '起送￥0', '基础运费￥5'],
+    slogin: '6元无门槛红包'
+  },
+  {
+    _id:'2',
+    imgUrl: 'http://www.dell-lee.com/imgs/vue3/near.png',
+    name: '永辉超市',
+    sales:7000,
+    expressLimit:0,
+    expressPrice:5,
+    tags: ['月售三万+', '起送￥0', '基础运费￥0'],
+    slogin: '8元无门槛红包'
+  },
+  {
+    _id:'3',
+    imgUrl: 'http://www.dell-lee.com/imgs/vue3/near.png',
+    name: '盒马生鲜',
+    sales:2000,
+    expressLimit:0,
+    expressPrice:5,
+    tags: ['月售一万+', '起送￥0', '基础运费￥5'],
+    slogin: '8元无门槛红包'
+  }]
+}
+```
+
+#### utils/request.js 封装get请求
+
+```
+
+export const get = (url, params = {}) => {
+  return new Promise((resolve, reject) => {
+    instance.get(url, { params }, {
+      baseURL: 'https://www.fastmock.site/mock/399fa18dcb16395f9f4bd9ba42f75cb1/shop',
+      headers: {
+        'Conntent-Type': 'application/json'
+      }
+    }).then(response => {
+      console.log('resolve')
+      resolve(response.data)
+    }, err => {
+      console.log('reject')
+      reject(err)
+    })
+  })
+}
+```
+
+#### 用axios实例简写
+
+```
+const instance = axios.create({
+  baseURL: 'https://www.fastmock.site/mock/399fa18dcb16395f9f4bd9ba42f75cb1/shop',
+  timeout: 10000
+})
+
+export const get = (url, params = {}) => {
+  return new Promise((resolve, reject) => {
+    instance.get(url, { params }).then(response => {
+      console.log('resolve')
+      resolve(response.data)
+    }, err => {
+      console.log('reject')
+      reject(err)
+    })
+  })
+}
+
+export const post = (url, data = {}) => {
+  return new Promise((resolve, reject) => {
+    instance.post(url, data).then(response => {
+      console.log('resolve')
+      resolve(response.data)
+    }, err => {
+      console.log('reject')
+      reject(err)
+    })
+  })
+}
+
+```
+
+#### nearby组件请求数据
+
+```
+<script>
+import { ref } from 'vue'
+import { get } from '../../utils/request'
+
+const useNearbyListEffect = () => {
+  const nearbyList = ref([])
+  const getNearbyList = async () => {
+    const result = await get('api/shop/hot-list')
+    console.log('result:', result, result?.errno === 0, result?.data?.length)
+    if (result?.errno === 0 && result?.data?.length) {
+      nearbyList.value = result.data
+    }
+  }
+  return { nearbyList, getNearbyList }
+}
+export default {
+  name: 'nearby-part',
+  setup () {
+    const { nearbyList, getNearbyList } = useNearbyListEffect()
+    getNearbyList()
+    return { nearbyList }
+  }
+}
+</script>
+```
+
+#### 将数据展示到页面中
+
+```
+<template>
+  <div class="nearby">
+    <h3 class="nearby__title">附近店铺</h3>
+    <div v-for="(item,index) in nearbyList" :key="index" class="nearby__item">
+      <img class="nearby__item__img" :src="item.imgUrl">
+      <div class="nearby__item__content">
+        <div class="nearby__item__title">{{item.name}}</div>
+        <div class="nearby__item__tags">
+          <span class="nearby__item__tag">月售{{item.sales}}</span>
+          <span class="nearby__item__tag">起送￥{{item.expressLimit}}</span><span class="nearby__item__tag">基础运费￥{{item.expressPrice}}</span>
+        </div>
+        <div class="nearby__item__highlight">{{item.slogin}}</div>
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+### 10-2 动态路由、异步路由，组件拆分复用
+
+```
+import { createRouter, createWebHashHistory } from 'vue-router'
+import Home from '../views/home/Home'
+import Login from '../views/login/Login'
+import Register from '../views/register/Register'
+import Shop from '../views/shop/Shop'
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home
+  },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: Shop
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
+  }
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+router.beforeEach((to, from, next) => {
+  const { isLogin } = localStorage
+  const { name } = to
+  const isLoginOrRegister = (name === 'login' || name === 'register');
+  (isLogin || isLoginOrRegister) ? next() : next({ name: 'login' })
+  console.log(from, to)
+  console.log(isLogin, isLoginOrRegister, isLogin || isLoginOrRegister)
+})
+export default router
+
+```
+
+加载首页的同时其他路由项也会加载，这样会拖慢首页加载速度，所以可以采用动态路由的方法，异步加载组件。
+
+#### 动态路由
+
+```
+import { createRouter, createWebHashHistory } from 'vue-router'
+// 无需引入
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: () => import(/* webpackChunkName:'home_123123' */ '../views/home/Home')
+  },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: () => import(/* webpackChunkName:'shop_123123' */ '../views/shop/Shop')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import(/* webpackChunkName:'register_123123' */ '../views/register/Register')
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import(/* webpackChunkName:'login_123123' */ '../views/login/Login')
+  }
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
+})
+router.beforeEach((to, from, next) => {
+  const { isLogin } = localStorage
+  const { name } = to
+  const isLoginOrRegister = (name === 'login' || name === 'register');
+  (isLogin || isLoginOrRegister) ? next() : next({ name: 'login' })
+  console.log(from, to)
+  console.log(isLogin, isLoginOrRegister, isLogin || isLoginOrRegister)
+})
+export default router
+
+```
+
+无需全部引入，webpackChunkName是为了方便展示效果，这样不会加载全部页面，只会加载当前需要显示的组件
+
+#### 组件拆分
+
+将店铺缩略行拆分为单独的组件
+
+```
+<template>
+  <div class="shop">
+    <img class="shop__img" :src="item.imgUrl">
+    <div :class="{'shop__content':true,'shop__content--bordered':hideBorder?false:true}">
+      <div class="shop__title">{{item.name}}</div>
+      <div class="shop__tags">
+        <span class="shop__tag">月售{{item.sales}}</span>
+        <span class="shop__tag">起送￥{{item.expressLimit}}</span><span class="shop__tag">基础运费￥{{item.expressPrice}}</span>
+      </div>
+      <div class="shop__highlight">{{item.slogin}}</div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { useRouter } from 'vue-router'
+export default {
+  name: 'shop-info',
+  props: ['item', 'hideBorder']
+}
+</script>
+
+<style lang="scss" scroped>
+@import "../style/viriables.scss";
+.shop {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  &__img {
+    height: 0.56rem;
+    width: 0.56rem;
+    margin-right: 0.16rem;
+  }
+  &__content {
+    flex: 1;
+    padding: 0.12rem 0;
+    &--bordered {
+      border-bottom: 0.01rem solid $content-bgColor;
+    }
+  }
+  &__title {
+    font-size: 0.16rem;
+  }
+  &__tags {
+    margin-top: 0.08rem;
+  }
+  &__tag {
+    margin-right: 0.16rem;
+  }
+  &__highlight {
+    color: red;
+    margin-top: 0.1rem;
+    font-size: 0.13rem;
+  }
+}
+</style>
+
+```
+
+然后Nearby.vue中使用
+
+```
+<template>
+  <div class="nearby">
+    <h3 class="nearby__title">附近店铺</h3>
+    <ShopInfo v-for="item in nearbyList" :key="item._id" :item="item" />
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue'
+import { get } from '../../utils/request'
+import ShopInfo from '../../components/ShopInfo'
+
+const useNearbyListEffect = () => {
+  const nearbyList = ref([])
+  const getNearbyList = async () => {
+    const result = await get('api/shop/hot-list')
+    console.log('result:', result, result?.errno === 0, result?.data?.length)
+    if (result?.errno === 0 && result?.data?.length) {
+      nearbyList.value = result.data
+    }
+  }
+  return { nearbyList, getNearbyList }
+}
+export default {
+  name: 'nearby-part',
+  components: { ShopInfo },
+  setup () {
+    const { nearbyList, getNearbyList } = useNearbyListEffect()
+    getNearbyList()
+    return { nearbyList }
+  }
+}
+</script>
+
+<style lang="scss" scroped>
+@import "../../style/viriables.scss";
+.nearby {
+  &__title {
+    margin: 0.16rem 0 0.04rem;
+    font-size: 0.18rem;
+    color: #333333;
+    font-weight: normal;
+  }
+}
+</style>
+
+```
+
+Shop.vue 中使用
+
+```
+<template>
+  <div class="wrapper">
+    <ShopInfo :item="item" :hideBorder="true" />
+  </div>
+
+</template>
+
+<script>
+import { reactive } from 'vue'
+import ShopInfo from '../../components/ShopInfo'
+export default {
+  name: 'shop-page',
+  components: { ShopInfo },
+  setup () {
+    const item = reactive({
+      _id: '1',
+      imgUrl: 'http://www.dell-lee.com/imgs/vue3/near.png',
+      name: '沃尔玛',
+      sales: 10000,
+      expressLimit: 0,
+      expressPrice: 5,
+      tags: ['月售一万+', '起送￥0', '基础运费￥5'],
+      slogin: '6元无门槛红包'
+    })
+    return { item }
+  }
+}
+</script>
+
+<style lang='scss' scroped>
+.wrapper {
+  padding: 0 0.18rem 0.2rem;
+  overflow-y: auto;
+}
+</style>
+
+```
+
 
 
 ## 第11章 商家展示功能开发（下）
