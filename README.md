@@ -4279,7 +4279,11 @@ export default {
 }
 ```
 
+### 9-9 setup函数职责及注册功能实现
 
+`placeholder="请输入密码"` 输入框提示
+
+`autocomplete="new-password"`  使密码不自动填充
 
 ## 第10章 商家展示功能开发（上）
 
