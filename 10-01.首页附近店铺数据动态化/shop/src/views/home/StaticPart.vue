@@ -40,7 +40,7 @@ export default {
 
 }
 </script>
-<style lang="scss" scroped>
+<style lang="scss" scoped>
 @import "../../style/viriables.scss";
 @import "../../style/mixins.scss";
 .wrapper {
@@ -79,8 +79,8 @@ export default {
 
 .search {
   line-height: 0.32rem;
-  background: #f5f5f5;
-  color: #b7b7b7;
+  background: $search-bgColor;
+  color: $search-fontColor;
   margin: 0 0 0.12rem;
   border-radius: 0.16rem;
   font-size: 0.13rem;

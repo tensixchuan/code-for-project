@@ -1,7 +1,9 @@
 <template>
   <div class="nearby">
     <h3 class="nearby__title">附近店铺</h3>
-    <ShopInfo v-for="item in nearbyList" :key="item._id" :item="item" />
+    <router-link v-for="item in nearbyList" :to="`/shop/${item._id}`" :key="item._id">
+      <ShopInfo :item="item" />
+    </router-link>
   </div>
 </template>
 
@@ -32,14 +34,18 @@ export default {
 }
 </script>
 
-<style lang="scss" scroped>
+<style lang="scss" scoped>
 @import "../../style/viriables.scss";
 .nearby {
   &__title {
     margin: 0.16rem 0 0.04rem;
     font-size: 0.18rem;
-    color: #333333;
+    color: $content-fontcolor;
     font-weight: normal;
+  }
+  a {
+    text-decoration: none;
+    color: $content-fontcolor;
   }
 }
 </style>

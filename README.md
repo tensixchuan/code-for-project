@@ -4433,7 +4433,7 @@ export default {
 </template>
 ```
 
-### 10-2 动态路由、异步路由，组件拆分复用
+### 10-2 动态路由、异步路由
 
 ```
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -4528,7 +4528,7 @@ export default router
 
 无需全部引入，webpackChunkName是为了方便展示效果，这样不会加载全部页面，只会加载当前需要显示的组件
 
-#### 组件拆分
+### 10-3 组件拆分复用
 
 将店铺缩略行拆分为单独的组件
 
@@ -4682,8 +4682,312 @@ export default {
   overflow-y: auto;
 }
 </style>
+ 
+```
+
+### 10-4 搜索布局
 
 ```
+<template>
+  <div class="wrapper">
+    <div class="search">
+      <div class="search__back iconfont" @click="handleBackClick">&#xe6db;</div>
+      <div class="search__content">
+        <span class="search__content__icon iconfont">&#xeafe;</span>
+        <input class="search__content__input" placeholder="请输入商品名称搜索" />
+      </div>
+    </div>
+    <ShopInfo :item="item" :hideBorder="true" />
+  </div>
+
+</template>
+
+<script>
+import { reactive } from 'vue'
+import ShopInfo from '../../components/ShopInfo'
+import { useRouter } from 'vue-router'
+export default {
+  name: 'shop-page',
+  components: { ShopInfo },
+  setup () {
+    const router = useRouter()
+    const handleBackClick = () => {
+      router.back()
+    }
+    const item = reactive({
+      _id: '1',
+      imgUrl: 'http://www.dell-lee.com/imgs/vue3/near.png',
+      name: '沃尔玛',
+      sales: 10000,
+      expressLimit: 0,
+      expressPrice: 5,
+      tags: ['月售一万+', '起送￥0', '基础运费￥5'],
+      slogin: '6元无门槛红包'
+    })
+    return { item, handleBackClick }
+  }
+}
+</script>
+
+<style lang='scss' scoped>
+.wrapper {
+  padding: 0 0.18rem 0.2rem;
+  overflow-y: auto;
+}
+.search {
+  margin: 0.16rem 0;
+  display: flex;
+  text-align: center;
+  &__back {
+    width: 0.32rem;
+    line-height: 0.32rem;
+    font-size: 0.25rem;
+    color: #b6b6b6;
+  }
+  &__content {
+    flex: 1;
+    display: flex;
+    border-radius: 0.16rem;
+    background: #f5f5f5;
+    &__icon {
+      width: 0.4rem;
+      line-height: 0.32rem;
+      font-size: 0.2rem;
+      color: #b6b6b6;
+    }
+    &__input {
+      flex: 1;
+      line-height: 0.32rem;
+      border: none;
+      background: none;
+      padding-right: 0.2rem;
+      font-size: 0.14rem;
+      &::placeholder {
+        color: #333;
+      }
+    }
+  }
+}
+</style>
+
+```
+
+`router.back()` 返回
+
+### 10-5 路由跳转
+
+通过router-link完成主页点击店铺列表跳转至店铺详情
+
+```
+<template>
+  <div class="nearby">
+    <h3 class="nearby__title">附近店铺</h3>
+    <router-link to="/shop" v-for="item in nearbyList" :key="item._id">
+      <ShopInfo :item="item" />
+    </router-link>
+
+  </div>
+</template>
+
+<script>
+import { ref } from 'vue'
+import { get } from '../../utils/request'
+import ShopInfo from '../../components/ShopInfo'
+
+const useNearbyListEffect = () => {
+  const nearbyList = ref([])
+  const getNearbyList = async () => {
+    const result = await get('api/shop/hot-list')
+    console.log('result:', result, result?.errno === 0, result?.data?.length)
+    if (result?.errno === 0 && result?.data?.length) {
+      nearbyList.value = result.data
+    }
+  }
+  return { nearbyList, getNearbyList }
+}
+export default {
+  name: 'nearby-part',
+  components: { ShopInfo },
+  setup () {
+    const { nearbyList, getNearbyList } = useNearbyListEffect()
+    getNearbyList()
+    return { nearbyList }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import "../../style/viriables.scss";
+.nearby {
+  &__title {
+    margin: 0.16rem 0 0.04rem;
+    font-size: 0.18rem;
+    color: #333333;
+    font-weight: normal;
+  }
+  a {
+    text-decoration: none;
+    color: #333333;
+  }
+}
+</style>
+
+```
+
+`<router-link to="/shop" v-for="item in nearbyList" :key="item._id"><ShopInfo :item="item" /> </router-link>` 设置路由跳转
+
+`a {text-decoration: none;color: #333333;}` 重写a标签样式，去除下划线等效果
+
+### 10-6 路由参数传递
+
+#### 传参
+
+修改router目录下index.js，在路径后添加:id，表示需要带一个id参数，访问时通过类似http://localhost:8080/#/shop/2才能跳转，2就是传过去的id
+
+```
+{
+    path: '/shop/:id',
+    name: 'shop',
+    component: () => import(/* webpackChunkName:'shop_123123' */ '../views/shop/Shop')
+  }
+```
+
+修改nearby.vue中的router-link
+
+```
+<template>
+  <div class="nearby">
+    <h3 class="nearby__title">附近店铺</h3>
+    <router-link :to="`/shop/${item._id}`" v-for="item in nearbyList" :key="item._id">
+      <ShopInfo :item="item" />
+    </router-link>
+
+  </div>
+</template>
+```
+
+#### 取参
+
+```
+import { useRouter, useRoute } from 'vue-router'
+......
+const rout = useRoute()
+console.log(rout.name, rout.params, rout.params.id )
+```
+
+可以通过rout.params取出所有的参数， rout.params.id 取出参数id对应的值
+
+### 10-7 商家详情获取
+
+用前面封装好的get方法向对应url发送请求，`get('/api/shop/' + rout.params.id)`
+
+```
+<template>
+  <div class="wrapper">
+    <div class="search">
+      <div class="search__back iconfont" @click="handleBackClick">&#xe6db;</div>
+      <div class="search__content">
+        <span class="search__content__icon iconfont">&#xeafe;</span>
+        <input class="search__content__input" placeholder="请输入商品名称搜索" />
+      </div>
+    </div>
+    <ShopInfo :item="item" :hideBorder="true" />
+  </div>
+
+</template>
+
+<script>
+import { reactive, toRefs } from 'vue'
+import ShopInfo from '../../components/ShopInfo'
+import { useRouter, useRoute } from 'vue-router'
+import { get } from '../../utils/request'
+export default {
+  name: 'shop-page',
+  components: { ShopInfo },
+  setup () {
+    const router = useRouter()
+    const rout = useRoute()
+    const handleBackClick = () => {
+      router.back()
+    }
+    const data = reactive({
+      item: {}
+    })
+    const getItemData = async () => {
+      const result = await get('/api/shop/' + rout.params.id)
+      console.log(result)
+      if (result?.errno === 0 && result?.data) {
+        data.item = result.data
+      }
+    }
+    getItemData()
+    const { item } = toRefs(data)
+    return { item, handleBackClick }
+  }
+}
+</script>
+
+<style lang='scss' scoped>
+......
+</style>
+
+```
+
+定义函数useShopInfoEffect拆分代码
+
+```
+<script>
+import { reactive, toRefs } from 'vue'
+import ShopInfo from '../../components/ShopInfo'
+import { useRouter, useRoute } from 'vue-router'
+import { get } from '../../utils/request'
+
+// 获取当前商铺信息
+const useShopInfoEffect = () => {
+  const rout = useRoute()
+  const data = reactive({
+    item: {}
+  })
+  const getItemData = async () => {
+    const result = await get('/api/shop/' + rout.params.id)
+    console.log(result)
+    if (result?.errno === 0 && result?.data) {
+      data.item = result.data
+    }
+  }
+  getItemData()
+  const { item } = toRefs(data)
+  return { item, getItemData }
+}
+
+// 点击回退逻辑
+const useBackEffect = () => {
+  const router = useRouter()
+  const handleBackClick = () => {
+    router.back()
+  }
+  return { handleBackClick }
+}
+
+export default {
+  name: 'shop-page',
+  components: { ShopInfo },
+  setup () {
+    const { item, getItemData } = useShopInfoEffect()
+    const { handleBackClick } = useBackEffect()
+    return { item, getItemData, handleBackClick }
+  }
+}
+</script>
+```
+
+因为数据的请求需要时间，所有图片部分会闪烁一下，先显示裂图后显示正确图片。可以设置v-show或者v-if，当图片获取成功后再显示，而不会显示裂图过渡。
+
+### 10-8 商家页面核心样式开发
+
+
+
+
 
 
 

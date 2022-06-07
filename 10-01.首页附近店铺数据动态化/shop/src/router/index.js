@@ -6,7 +6,7 @@ const routes = [
     component: () => import(/* webpackChunkName:'home_123123' */ '../views/home/Home')
   },
   {
-    path: '/shop',
+    path: '/shop/:id',
     name: 'shop',
     // component: Shop
     component: () => import(/* webpackChunkName:'shop_123123' */ '../views/shop/Shop')
