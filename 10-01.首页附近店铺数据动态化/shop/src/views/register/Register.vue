@@ -72,11 +72,11 @@ export default {
   &__register-botton {
     line-height: 0.48rem;
     margin: 0.32rem 0.4rem 0.16rem 0.4rem;
-    background: #0091ff;
+    background: $highlight-bgColor;
     box-shadow: 0 0.04rem 0.08rem 0 rgba(0, 145, 255, 0.32);
     border-radius: 4px;
     text-align: center;
-    color: white;
+    color: $bgColor;
     font-size: 0.16rem;
   }
   &__register-link {

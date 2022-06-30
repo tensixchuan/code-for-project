@@ -1,5 +1,5 @@
 <template>
-  <div class="shop" @click="handleClick">
+  <div class="shop">
     <img class="shop__img" :src="item.imgUrl">
     <div :class="{'shop__content':true,'shop__content--bordered':hideBorder?false:true}">
       <div class="shop__title">{{item.name}}</div>
@@ -13,17 +13,9 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router'
 export default {
   name: 'shop-info',
-  props: ['item', 'hideBorder'],
-  setup () {
-    const router = useRouter()
-    const handleClick = () => {
-      router.push({ name: 'shop' })
-    }
-    return { handleClick }
-  }
+  props: ['item', 'hideBorder']
 }
 </script>
 
